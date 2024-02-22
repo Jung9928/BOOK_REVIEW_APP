@@ -10,6 +10,9 @@
                 <router-link to="/" class="text-white">메인 화면</router-link>
               </li>
               <li>
+                <router-link to="/signup" class="text-white">회원가입</router-link>
+              </li>
+              <li>
                 <router-link to="/login" class="text-white" v-if="!$store.state.account.id">로그인</router-link>
                 <a to="/login" class="text-white" @click="logout()" v-else>로그아웃</a>
               </li>
@@ -41,7 +44,7 @@ export default {
   name: 'Header',
   setup() {
     const logout = ()=> {
-      axios.post("/api/account/logout").then(()=> {
+      axios.post("/api/v1/account/logout").then(()=> {
         store.commit('setAccount', 0);
         router.push({path:"/"});
       })

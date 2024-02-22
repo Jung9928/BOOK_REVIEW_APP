@@ -26,7 +26,7 @@ export default {
       books: []
     })
 
-    axios.get("/api/books").then(({data}) => {
+    axios.get("/api/v1/books").then(({data}) => {
       state.books = data;
     })
 

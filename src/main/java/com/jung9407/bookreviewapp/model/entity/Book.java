@@ -1,4 +1,4 @@
-package com.jung9407.bookreviewapp.entity;
+package com.jung9407.bookreviewapp.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.jung9407.bookreviewapp.controller;
 
-import com.jung9407.bookreviewapp.entity.Book;
+import com.jung9407.bookreviewapp.model.entity.Book;
 import com.jung9407.bookreviewapp.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +14,7 @@ public class BookController {
     @Autowired
     BookRepository bookRepository;
 
-    @GetMapping("/api/books")
+    @GetMapping("/api/v1/books")
     public List<Book> getBooks() {
         List<Book> books = bookRepository.findAll();
 
