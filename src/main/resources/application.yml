@@ -10,9 +10,26 @@ spring.datasource:
 spring.jpa:
   show-sql: true
   generate-ddl: true
-  hibernate.ddl-auto: create
+  hibernate.ddl-auto: update
 
 jwt:
-  secret-key: jung9928_book_review_app_2024.secret_key
-  # 30 days
-  token.expired-time-ms: 2592000000
+    secret-key: jung9928_book_review_app_2024.secret_key
+    # 30 days
+    token.expired-time-ms: 2592000000
+
+    live:
+      atk: 60000
+      rtk: 300000
+
+
+spring:
+  redis:
+    pool:
+      min-idle: 0
+      max-idle: 8
+      max-active: 8
+
+  data:
+    redis:
+      port: 6379
+      host: localhost

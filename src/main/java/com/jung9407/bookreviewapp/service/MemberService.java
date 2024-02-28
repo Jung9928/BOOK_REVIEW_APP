@@ -3,26 +3,25 @@ package com.jung9407.bookreviewapp.service;
 import com.jung9407.bookreviewapp.exception.ApplicationException;
 import com.jung9407.bookreviewapp.exception.ErrorCode;
 import com.jung9407.bookreviewapp.model.dto.MemberDTO;
+import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberLoginRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
+import com.jung9407.bookreviewapp.model.dto.jwt.TokenResponseDTO;
 import com.jung9407.bookreviewapp.model.entity.MemberEntity;
 import com.jung9407.bookreviewapp.repository.MemberRepository;
-import com.jung9407.bookreviewapp.util.JwtTokenUtils;
+import com.jung9407.bookreviewapp.util.JwtProvider;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.query.sql.internal.ParameterRecognizerImpl;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final JwtProvider jwtProvider;
 
     private final BCryptPasswordEncoder encoder;
 
@@ -50,6 +49,8 @@ public class MemberService {
                 new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s는 존재하지 않는 ID 입니다.", memberId)));
     }
 
+
+    // 회원가입
     @Transactional
     public MemberDTO signup(MemberSignupRequestDTO memberSignupRequestDTO) {
         // 1. 회원가입하려는 memberId가 이미 존재하는 지
@@ -82,22 +83,38 @@ public class MemberService {
 //        return "해당 아이디는 회원가입이 가능합니다.";
 //    }
 
-    public String login(String memberId, String password) {
+    // 로그인
+    @Transactional
+    public TokenResponseDTO login(MemberLoginRequestDTO memberLoginRequestDTO, HttpServletResponse response) {
+
+        System.out.println("memberId : " + memberLoginRequestDTO.getMemberId());
+        System.out.println("password : " + memberLoginRequestDTO.getPassword());
+
         // 회원가입 여부 체크
-        MemberEntity memberEntity = memberRepository.findByMemberId(memberId).orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s는 가입되어있지않은 ID입니다.")));
+        MemberEntity memberEntity = memberRepository.findByMemberId(memberLoginRequestDTO.getMemberId()).orElseThrow(() ->
+                new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s는 가입되어있지않은 ID입니다.", memberLoginRequestDTO.getMemberId())));
 
         // 비밀번호 체크
-        if(encoder.matches(password, memberEntity.getPassword())) {
-            throw new ApplicationException(ErrorCode.DUPLICATED_MEMBER_ID);
+        if(!encoder.matches(memberLoginRequestDTO.getPassword(), memberEntity.getPassword())) {
+            throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 
         // 토큰 생성
-        String token = JwtTokenUtils.generateToken(memberId, secretKey, expiredTimeMs);
+        TokenResponseDTO tokenResponseDTO = jwtProvider.generateTokenByLogin(memberEntity.getMemberId(), memberEntity.getMemberRole(), secretKey);
+        response.addHeader("Authorization", tokenResponseDTO.getAccessToken());     // 헤더에 액세스 토큰만 저장.
 
-        return token;
+        return tokenResponseDTO;
     }
 
-    public void deleteUserById(@PathVariable int id) {
-        memberRepository.deleteById(id);
-    }
+//    // 회원 탈퇴
+//    public ResponseEntity<ResponseBody> deleteMember(HttpServletRequest request) {
+//
+//        // request에서 Access 토큰 정보 추출
+//        String refreshToken = request.getHeader("Refresh-Token");
+//
+//        // 리프레스 토큰 유효성 검사
+//        if(!jwtTokenProvider)
+//
+//
+//    }
 }

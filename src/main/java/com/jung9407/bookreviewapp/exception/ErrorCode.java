@@ -15,7 +15,11 @@ public enum ErrorCode {
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 틀립니다."),
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 에러 발생"),
+
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "토큰이 만료되었습니다.")
     ;
+
+
 
     private HttpStatus httpStatus;
     private String message;

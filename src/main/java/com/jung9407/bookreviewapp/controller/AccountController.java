@@ -1,41 +1,30 @@
 package com.jung9407.bookreviewapp.controller;
 
 import com.jung9407.bookreviewapp.model.dto.MemberDTO;
+import com.jung9407.bookreviewapp.model.dto.jwt.TokenResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberLoginRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.MemberLoginResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.MemberSignupResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.ResponseResultCode;
-import com.jung9407.bookreviewapp.model.entity.MemberEntity;
 
 import com.jung9407.bookreviewapp.repository.MemberRepository;
-import com.jung9407.bookreviewapp.service.JwtService;
 import com.jung9407.bookreviewapp.service.MemberService;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
+@Slf4j
 public class AccountController {
-
-    @Autowired
-    MemberRepository memberRepository;
-
-    @Autowired
-    JwtService jwtService;
-
-//    @Autowired
-//    MemberService memberService;
 
     private final MemberService memberService;
 
@@ -86,37 +75,47 @@ public class AccountController {
 
 
     @PostMapping("/login")
-    public ResponseResultCode<MemberLoginResponseDTO> login(@RequestBody MemberLoginRequestDTO memberLoginRequestDTO) {
-        String token = memberService.login(memberLoginRequestDTO.getUserId(), memberLoginRequestDTO.getPassword());
-        return ResponseResultCode.success(new MemberLoginResponseDTO(token));
+    public ResponseResultCode<MemberLoginResponseDTO> login(@RequestBody MemberLoginRequestDTO memberLoginRequestDTO, HttpServletResponse response) {
+        TokenResponseDTO tokenResponseDTO = memberService.login(memberLoginRequestDTO, response);
+        System.out.println("access token : " + tokenResponseDTO.getAccessToken());
+        System.out.println("refresh token : " + tokenResponseDTO.getRefreshToken());
+
+        return ResponseResultCode.success(new MemberLoginResponseDTO(tokenResponseDTO.getAccessToken(), tokenResponseDTO.getRefreshToken()));
     }
 
     // 로그아웃
-    @PostMapping("logout")
-    public ResponseEntity logout(HttpServletResponse res) {
-        Cookie cookie = new Cookie("token", null);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
+//    @Transactionfa("logout")
+//    public ResponseEntity logout(HttpServletResponse res) {
+//        Cookie cookie = new Cookie("token", null);
+//        cookie.setPath("/");
+//        cookie.setMaxAge(0);
+//
+//        res.addCookie(cookie);
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
 
-        res.addCookie(cookie);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+//    @GetMapping("check")
+//    public ResponseEntity check(@CookieValue(value = "token", required = false) String token) {
+//        Claims claims = jwtService.getClaims(token);
+//
+//        if(claims != null) {
+//            int id = Integer.parseInt(claims.get("id").toString());
+//            return new ResponseEntity<>(id, HttpStatus.OK);
+//        }
+//
+//        return new ResponseEntity<>(null, HttpStatus.OK);
+//    }
 
-    @GetMapping("check")
-    public ResponseEntity check(@CookieValue(value = "token", required = false) String token) {
-        Claims claims = jwtService.getClaims(token);
+    // 로그아웃
+//    @PatchMapping("/logout")
 
-        if(claims != null) {
-            int id = Integer.parseInt(claims.get("id").toString());
-            return new ResponseEntity<>(id, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(null, HttpStatus.OK);
-    }
-
-    // 회원탈퇴
+//    // 회원탈퇴
 //    @DeleteMapping("/api/account/{id}")
-//    public void deleteUser(@PathVariable int id) {
-//        MemberEntity.deletedById(id);
+//    public ResponseEntity<String> deleteUser(@PathVariable String memberId, HttpServletRequest request) {
+//        log.info("회원탈퇴요청 ID : {}", memberId);
+//        log.info("탈퇴 토큰 : {}", request.getHeader("Authorization"));
+//        memberService.deleteMember(request);
+//
+//        return new ResponseEntity<>("회원 탈퇴 성공", HttpStatus.OK);
 //    }
 }

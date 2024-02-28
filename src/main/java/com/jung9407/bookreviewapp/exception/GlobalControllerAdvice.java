@@ -27,4 +27,11 @@ public class GlobalControllerAdvice {
                 .body(ResponseResultCode.error(ErrorCode.INTERNAL_SERVER_ERROR.name()));
     }
 
+    // 어플리케이션 Runtime 중에 발생하는 예외(db crud 등등)를 핸들링하는 함수
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<?> securityExceptionHandler() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ResponseResultCode.error(ErrorCode.BAD_REQUEST.name()));
+    }
+
 }
