@@ -81,8 +81,12 @@ public class JwtProvider {
         // 액세스 토큰 만료시간
         Date expiration = Jwts.parserBuilder().setSigningKey(getKey(secretKey)).build().parseClaimsJws(accessToken).getBody().getExpiration();
 
+        System.out.println("액세스 토큰 만료시간 : " + expiration);
+
         // 현재시간
         long now = new Date().getTime();
+
+        System.out.println("현재 시간 : " + now);
 
         return (expiration.getTime() - now);
     }
@@ -96,9 +100,8 @@ public class JwtProvider {
         return Jwts.builder()
                 .claim("auth", memberRole)                                        // JWT에 사용자 역할 정보를 claim에 추가.
                 .setSubject(memberId)                                                   // JWT에 subject를 memberId로 설정
-                //.setClaims(memberId)                                                      // JWT에 사용자 역할 정보를 claims로 추가
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiredTimeMs))
+                .setIssuedAt(new Date(System.currentTimeMillis()))                      // 토큰 발행일자
+                .setExpiration(new Date(System.currentTimeMillis() + expiredTimeMs))    // 토큰 유효기간
                 .signWith(getKey(key), SignatureAlgorithm.HS256)                        // JWT에 서명(signature)추가 -> key는 서명에 사용되는 비밀키.
                 .compact();
     }
@@ -110,21 +113,20 @@ public class JwtProvider {
         String accessToken = generateToken(memberId, memberRole, key, atkLive);          // access token 생성
         String refreshToken = generateToken(memberId, memberRole, key, rtkLive);          // refresh token 생성
 
-        //redisDAO.setValues(memberId, rtk, Duration.ofMillis(rtkLive));
         redisDAO.setRefreshToken(memberId, refreshToken, rtkLive);
 
         return new TokenResponseDTO(accessToken, refreshToken);
     }
 
     // 필터 단계에서 검증된 RTK에서 꺼낸 memberId가 Redis 인메모리에 존재하는지 확인 후, ATK, RTK 재발급 진행
-    public TokenResponseDTO reissueAtk(String memberId, MemberRole memberRole, String key, String reToken) {
+    public TokenResponseDTO reissueAtk(String memberId, MemberRole memberRole, String reToken) {
         // 레디스에 저장된 리프레쉬 토큰 값을 가져와서 입력된 refreshToken과 같은 지 확인
         if(!redisDAO.getRefreshToken(memberId).equals(reToken)) {
             throw new ApplicationException(ErrorCode.INTERNAL_SERVER_ERROR, String.format("토큰에 문제가 있습니다."));
         }
 
-        String accessToken = generateToken(memberId, memberRole, key, atkLive);
-        String refreshToken = generateToken(memberId, memberRole, key, atkLive);
+        String accessToken = generateToken(memberId, memberRole, secretKey, atkLive);
+        String refreshToken = generateToken(memberId, memberRole, secretKey, atkLive);
         redisDAO.setRefreshToken(memberId, refreshToken, rtkLive);
 
         return new TokenResponseDTO(accessToken, refreshToken);
@@ -138,10 +140,13 @@ public class JwtProvider {
     public boolean validateToken(String token) {
         try {
             // 주어진 토큰 파싱을 위해 JWT 파서를 설정하고 서명키를 설정한 뒤, 토큰 파싱하여 JWT 서명(signature)검사 수행.
-            Jwts.parserBuilder().setSigningKey(getKey(secretKey)).build().parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(getKey(secretKey)).build().parseClaimsJws(token);
+            System.out.println("claims : " + claims);
             return true;        // 토큰이 유효하면 true
+        } catch (ExpiredJwtException e) {
+            log.info("JWT Expired, 만료된 토큰입니다.");
         } catch (SecurityException | MalformedJwtException | UnsupportedJwtException e) {   // 권한이 없다면
-            log.info("Invalid JWT, 만료된 토큰 입니다.");
+            log.info("Invalid JWT, 유효하지 않은 토큰 입니다.");
         } catch (IllegalArgumentException e) {                                              // JWT가 올바르게 구성되지 않았다면
             log.info("JWT claims is empty, 잘못된 토큰 입니다.");
         }

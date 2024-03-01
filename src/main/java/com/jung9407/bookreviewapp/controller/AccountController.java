@@ -1,6 +1,8 @@
 package com.jung9407.bookreviewapp.controller;
 
 import com.jung9407.bookreviewapp.model.dto.MemberDTO;
+import com.jung9407.bookreviewapp.model.dto.jwt.CustomMemberDetails;
+import com.jung9407.bookreviewapp.model.dto.jwt.ReissueTokenRequest;
 import com.jung9407.bookreviewapp.model.dto.jwt.TokenResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberLoginRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
@@ -10,6 +12,7 @@ import com.jung9407.bookreviewapp.model.dto.responseDTO.ResponseResultCode;
 
 import com.jung9407.bookreviewapp.repository.MemberRepository;
 import com.jung9407.bookreviewapp.service.MemberService;
+import com.jung9407.bookreviewapp.util.JwtProvider;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
 
     private final MemberService memberService;
+    private final JwtProvider jwtProvider;
 
     // 회원가입
 //    @PostMapping("/api/v1/signup")
@@ -84,15 +89,12 @@ public class AccountController {
     }
 
     // 로그아웃
-//    @Transactionfa("logout")
-//    public ResponseEntity logout(HttpServletResponse res) {
-//        Cookie cookie = new Cookie("token", null);
-//        cookie.setPath("/");
-//        cookie.setMaxAge(0);
-//
-//        res.addCookie(cookie);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
+    @DeleteMapping("/logout")
+    public ResponseEntity logout(@AuthenticationPrincipal CustomMemberDetails customMemberDetails, HttpServletRequest request) {
+
+        String accessToken = jwtProvider.getTokenFromHeader(request);
+        return memberService.logout(accessToken, customMemberDetails.getUsername());        // getUsername() : memberId
+    }
 
 //    @GetMapping("check")
 //    public ResponseEntity check(@CookieValue(value = "token", required = false) String token) {
@@ -106,16 +108,42 @@ public class AccountController {
 //        return new ResponseEntity<>(null, HttpStatus.OK);
 //    }
 
-    // 로그아웃
-//    @PatchMapping("/logout")
+    /**
+     * 해당 유저의 정보 확인
+     * @param customMemberDetails
+     * @return
+     * */
+    @GetMapping("/member-info")
+    public MemberDTO getMemberInfo(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+        return memberService.getMemberByMemberId(customMemberDetails.getUsername());
+    }
 
-//    // 회원탈퇴
-//    @DeleteMapping("/api/account/{id}")
-//    public ResponseEntity<String> deleteUser(@PathVariable String memberId, HttpServletRequest request) {
-//        log.info("회원탈퇴요청 ID : {}", memberId);
-//        log.info("탈퇴 토큰 : {}", request.getHeader("Authorization"));
-//        memberService.deleteMember(request);
-//
-//        return new ResponseEntity<>("회원 탈퇴 성공", HttpStatus.OK);
-//    }
+    /**
+     * Access Token 재발급
+     * 매 API 호출 시, Security Filter를 통해 인증/인가를 받음.
+     * -> 만료된 토큰인지 검증하고 만료 시, 만료된 토큰임을 에러메세지 출력
+     * -> 클라이언트에서 에러메세지 확인 후, 이 api(atk 재발급) 요청 진행
+     *
+     * @param customMemberDetails
+     * @param : tokenRequest  refreshToken
+     * @return AccessToken + RefreshToken
+     * */
+    @PostMapping("/reissue-token")
+    public TokenResponseDTO reissueToken(@AuthenticationPrincipal CustomMemberDetails customMemberDetails, @RequestBody ReissueTokenRequest reissueTokenRequest) {
+
+        // member 객체 정보를 이용하여 토큰 발행
+        MemberDTO memberDTO = MemberDTO.entityToMemberDTO(customMemberDetails.getMemberEntity());
+        return jwtProvider.reissueAtk(memberDTO.getMemberId(), memberDTO.getMemberRole(), reissueTokenRequest.getRefreshToken());
+    }
+
+
+    // 회원탈퇴
+    @DeleteMapping("/api/account/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable String memberId, HttpServletRequest request) {
+        log.info("회원탈퇴요청 ID : {}", memberId);
+        log.info("탈퇴 토큰 : {}", request.getHeader("Authorization"));
+        memberService.deleteMember(request);
+
+        return new ResponseEntity<>("회원 탈퇴 성공", HttpStatus.OK);
+    }
 }

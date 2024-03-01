@@ -2,8 +2,6 @@ package com.jung9407.bookreviewapp.exception.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jung9407.bookreviewapp.exception.ApplicationException;
-import com.jung9407.bookreviewapp.exception.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,11 +20,6 @@ import java.io.IOException;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
-
-//    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper) {
-//        this.objectMapper = objectMapper;
-//    }
-//
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {

@@ -2,6 +2,7 @@ package com.jung9407.bookreviewapp.service;
 
 import com.jung9407.bookreviewapp.exception.ApplicationException;
 import com.jung9407.bookreviewapp.exception.ErrorCode;
+import com.jung9407.bookreviewapp.model.dao.RedisDAO;
 import com.jung9407.bookreviewapp.model.dto.MemberDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberLoginRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
@@ -12,6 +13,7 @@ import com.jung9407.bookreviewapp.util.JwtProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,8 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+
+    private final RedisDAO redisDAO;
 
     private final BCryptPasswordEncoder encoder;
 
@@ -62,7 +66,8 @@ public class MemberService {
         MemberEntity memberEntity = memberRepository.save(MemberEntity.createMemberEntity(
                 memberSignupRequestDTO.getMemberId(),
                 encoder.encode(memberSignupRequestDTO.getPassword()),           // 회원 등록 시, 비밀번호 암호화 진행
-                memberSignupRequestDTO.getEmail()
+                memberSignupRequestDTO.getEmail(),
+                memberSignupRequestDTO.getMemberRole()
         ));
 
         //throw new ApplicationException(ErrorCode.DUPLICATED_MEMBER_ID, String.format("%s는 이미 존재하는 아이디 입니다.", memberSignupRequestDTO.getMemberId()));
@@ -106,15 +111,19 @@ public class MemberService {
         return tokenResponseDTO;
     }
 
-//    // 회원 탈퇴
-//    public ResponseEntity<ResponseBody> deleteMember(HttpServletRequest request) {
-//
-//        // request에서 Access 토큰 정보 추출
-//        String refreshToken = request.getHeader("Refresh-Token");
-//
-//        // 리프레스 토큰 유효성 검사
-//        if(!jwtTokenProvider)
-//
-//
-//    }
+    // 로그아웃
+    @Transactional
+    public ResponseEntity logout(String accessToken, String memberId) {
+        // Redis에 accessToken을 사용못하도록 등록
+        Long expiration = jwtProvider.getExpirationTime(accessToken);
+        redisDAO.setBlackList(accessToken, "logout", expiration);
+
+        if(redisDAO.hasKey(memberId)) {
+            redisDAO.deleteRefreshToken(memberId);
+        }
+        else {
+            throw new IllegalArgumentException("이미 로그아웃한 유저입니다.");
+        }
+        return ResponseEntity.ok("로그아웃 완료");
+    }
 }

@@ -61,12 +61,13 @@ public class MemberEntity {
 //        return memberEntity;
 //    }
 
-    public static MemberEntity createMemberEntity(String memberId, String password, String email) {
+    public static MemberEntity createMemberEntity(String memberId, String password, String email, MemberRole memberRole) {
         MemberEntity memberEntity = new MemberEntity();
 
         memberEntity.setMemberId(memberId);
         memberEntity.setPassword(password);
         memberEntity.setEmail(email);
+        memberEntity.setMemberRole(memberRole);
 
         return memberEntity;
     }

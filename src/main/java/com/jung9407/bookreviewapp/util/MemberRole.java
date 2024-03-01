@@ -1,7 +1,9 @@
 package com.jung9407.bookreviewapp.util;
 
-public enum MemberRole {
+import lombok.Getter;
 
+@Getter
+public enum MemberRole {
     ADMIN,
     USER
 }
