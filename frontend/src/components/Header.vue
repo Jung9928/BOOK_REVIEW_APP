@@ -14,7 +14,7 @@
               </li>
               <li>
                 <!-- v-if 를 사용하여 로그인하지 않은 상태라면(상태값인 id가 store.js에 저장되어있지 않다면) 로그인 메뉴가 노출되고 아니라면 로그아웃만 노출. -->
-                <router-link to="/login" class="text-white" v-if="!$store.state.account.id">로그인</router-link>
+                <router-link to="/login" class="text-white" v-if="!$store.state.payload.setAccessToken">로그인</router-link>
                 <a to="/login" class="text-white" @click="logout()" v-else>로그아웃</a>
               </li>
             </ul>
@@ -46,7 +46,7 @@ export default {
   setup() {
     const logout = ()=> {
       axios.post("/api/v1/members/logout").then(()=> {
-        store.commit('setAccount', 0);
+        store.commit('setAccessToken', 0);
         router.push({path:"/"});
       })
     }

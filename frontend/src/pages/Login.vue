@@ -33,6 +33,7 @@
 import {reactive} from "vue";
 import axios from "axios";
 import router from "@/scripts/router";
+import store from "@/scripts/store";
 
 export default {
   setup() {
@@ -63,12 +64,18 @@ export default {
           .then((res) => {
             // 성공했을 경우
             console.log(state);
+            console.log(res.data);
+            store.commit('setAccessToken', res.data);
+            sessionStorage.setItem("accessToken", res.data);
+            console.log( sessionStorage.getItem('accessToken') ); // 새로 고침 후: 1
+            console.log( sessionStorage.getItem('refreshToken') ); // 새로 고침 후: 1
             router.push({path:"/"});
             window.alert("로그인하셨습니다.", res);
           })
           .catch((res) => {
             // 실패했을 경우
             console.log(state);
+            console.log(res.data);
             window.alert("회원이 아닙니다. 회원가입 후, 로그인 바랍니다.", res);
           })
     };
