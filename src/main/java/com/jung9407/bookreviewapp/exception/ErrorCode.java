@@ -16,7 +16,11 @@ public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 에러 발생"),
 
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, "토큰이 만료되었습니다.")
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "토큰이 만료되었습니다."),
+
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
+
+    INVALID_POST_PERMISSION(HttpStatus.UNAUTHORIZED, "해당 게시글 작성자가 아닙니다."),
     ;
 
 

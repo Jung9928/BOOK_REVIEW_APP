@@ -1,5 +1,6 @@
 package com.jung9407.bookreviewapp.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.ResponseResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,12 @@ public class GlobalControllerAdvice {
     public ResponseEntity<?> securityExceptionHandler() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseResultCode.error(ErrorCode.BAD_REQUEST.name()));
+    }
+
+    @ExceptionHandler(JsonProcessingException.class)
+    public ResponseEntity<?> loginCheckExceptionHandler(JsonProcessingException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ResponseResultCode.error(e.getMessage()));
     }
 
 }

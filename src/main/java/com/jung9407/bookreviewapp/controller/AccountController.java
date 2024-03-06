@@ -1,5 +1,6 @@
 package com.jung9407.bookreviewapp.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jung9407.bookreviewapp.model.dto.MemberDTO;
 import com.jung9407.bookreviewapp.model.dto.jwt.CustomMemberDetails;
 import com.jung9407.bookreviewapp.model.dto.jwt.ReissueTokenRequest;
@@ -32,16 +33,6 @@ public class AccountController {
 
     private final MemberService memberService;
     private final JwtProvider jwtProvider;
-
-    // 회원가입
-//    @PostMapping("/api/v1/signup")
-//    public ResponseEntity signup(@RequestBody MemberJoinDTO memberJoinDTO) {
-//        System.out.println("AccountController.java");
-//        System.out.println("memberJoinDTO : " + memberJoinDTO);
-//        memberService.signup(memberJoinDTO);
-//
-//        return new ResponseEntity<>(memberJoinDTO.getMemberId(), HttpStatus.OK);
-//    }
 
     // 회원가입
     @PostMapping("/signup")
@@ -96,17 +87,17 @@ public class AccountController {
         return memberService.logout(accessToken, customMemberDetails.getUsername());        // getUsername() : memberId
     }
 
-//    @GetMapping("check")
-//    public ResponseEntity check(@CookieValue(value = "token", required = false) String token) {
-//        Claims claims = jwtService.getClaims(token);
-//
-//        if(claims != null) {
-//            int id = Integer.parseInt(claims.get("id").toString());
-//            return new ResponseEntity<>(id, HttpStatus.OK);
-//        }
-//
-//        return new ResponseEntity<>(null, HttpStatus.OK);
-//    }
+    @GetMapping("/check")
+    public ResponseEntity check(@CookieValue(value = "token", required = false) String token) {
+        Claims claims = jwtProvider.getMemberInfoFromToken(token);
+
+        if(claims != null) {
+            long id = Integer.parseInt(claims.get("id").toString());
+            return new ResponseEntity<>(id, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
 
     /**
      * 해당 유저의 정보 확인
@@ -137,13 +128,13 @@ public class AccountController {
     }
 
 
-    // 회원탈퇴
-    @DeleteMapping("/api/account/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable String memberId, HttpServletRequest request) {
-        log.info("회원탈퇴요청 ID : {}", memberId);
-        log.info("탈퇴 토큰 : {}", request.getHeader("Authorization"));
-        memberService.deleteMember(request);
-
-        return new ResponseEntity<>("회원 탈퇴 성공", HttpStatus.OK);
-    }
+//    // 회원탈퇴
+//    @DeleteMapping("/api/account/{id}")
+//    public ResponseEntity<String> deleteUser(@PathVariable String memberId, HttpServletRequest request) {
+//        log.info("회원탈퇴요청 ID : {}", memberId);
+//        log.info("탈퇴 토큰 : {}", request.getHeader("Authorization"));
+//        memberService.deleteMember(request);
+//
+//        return new ResponseEntity<>("회원 탈퇴 성공", HttpStatus.OK);
+//    }
 }

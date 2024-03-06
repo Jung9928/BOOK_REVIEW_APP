@@ -29,7 +29,6 @@ public class PostEntity {
    @JoinColumn(name = "member_id")
    private MemberEntity member;
 
-   @NotNull
    @Size(min = 2, max=40, message = "제목은 2자이상 40자 이하입니다.")
    @Column(name = "title")
    private String title;

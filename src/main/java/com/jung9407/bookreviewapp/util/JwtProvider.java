@@ -29,7 +29,6 @@ import java.util.Date;
 public class JwtProvider {
 
     private final RedisDAO redisDAO;
-    private final ObjectMapper objectMapper;
     private final CustomMemberDetailsService customMemberDetailsService;
 
     @Value("${jwt.secret-key}")
@@ -67,7 +66,7 @@ public class JwtProvider {
      * @param : token
      * @return
      * */
-    public Claims getMemberInfoFromToken(String atk) throws JsonProcessingException {
+    public Claims getMemberInfoFromToken(String atk) {
 
         return Jwts.parserBuilder().setSigningKey(getKey(secretKey)).build().parseClaimsJws(atk).getBody();
     }

@@ -71,8 +71,8 @@ public class MemberEntity {
 
         return memberEntity;
     }
-
-    @OneToMany(mappedBy = "member")
-    private List<PostEntity> posts;
+//
+//    @OneToMany(mappedBy = "member")
+//    private List<PostEntity> posts;
 
 }

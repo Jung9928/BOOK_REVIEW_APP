@@ -1,6 +1,9 @@
 package com.jung9407.bookreviewapp.controller;
 
 import com.jung9407.bookreviewapp.model.dto.PostCreateDTO;
+import com.jung9407.bookreviewapp.model.dto.PostModifyDTO;
+import com.jung9407.bookreviewapp.model.dto.requestDTO.PostModifyRequestDTO;
+import com.jung9407.bookreviewapp.model.dto.responseDTO.PostModifyResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.ResponseResultCode;
 import com.jung9407.bookreviewapp.model.entity.PostEntity;
 import com.jung9407.bookreviewapp.repository.PostRepository;
@@ -31,19 +34,31 @@ public class PostController {
 
     private PostValidator postValidator;
 
-//    @PostMapping("/api/v1/posts")
-//    public Map<String, String> post(@RequestBody @Valid PostCreateDTO postCreateDTO) {
-//        // 데이터 검증 --> PostCreateDTO에서 @NotBlank로 처리
-//        postService.create(postCreateDTO.getTitle(), postCreateDTO.getContent(), "");
-//
-//        return Map.of();
-//    }
-
     // 게시글 작성
     @PostMapping
     public ResponseResultCode<Void> create(@RequestBody PostCreateDTO postCreateDTO, Authentication authentication) {
         postService.create(postCreateDTO.getTitle(), postCreateDTO.getContent(), authentication.getName());
-        return ResponseResultCode.success(null);
+        return ResponseResultCode.success();
+    }
+
+
+    // 게시글 수정
+    @PutMapping("/{postId}")
+    public ResponseResultCode<PostModifyResponseDTO> modify(@PathVariable Long postId, @RequestBody PostModifyRequestDTO postModifyRequestDTO, Authentication authentication) {
+        PostModifyResponseDTO postModifyResponseDTO = postService.modify(postModifyRequestDTO.getTitle(), postModifyRequestDTO.getContent(), authentication.getName(), postId);
+        System.out.println("========================================");
+        System.out.println("postId : " + postModifyResponseDTO.getPostId());
+        System.out.println("title : " + postModifyResponseDTO.getTitle());
+        System.out.println("content : " + postModifyResponseDTO.getContent());
+        System.out.println("========================================");
+
+        return ResponseResultCode.success(postModifyResponseDTO);
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseResultCode<Void> delete(@PathVariable Long postId, Authentication authentication) {
+        postService.delete(authentication.getName(), postId);
+        return ResponseResultCode.success();
     }
 
 
