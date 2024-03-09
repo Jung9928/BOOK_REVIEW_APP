@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.NoSuchAlgorithmException;
 
 @RestController
-@RequestMapping("/api/v1/email")
+@RequestMapping("/api/v1/verifyEmail")
 @RequiredArgsConstructor
 @Slf4j
 public class EmailController {
@@ -23,12 +23,12 @@ public class EmailController {
     public ResponseEntity<String> sendVerifyEmail(@PathVariable String emailAddr) throws MessagingException {
         log.info("Inside sendVerifyEmail method"); // 추가
         log.info("emailAddr : {}", emailAddr);
-        emailService.sendMail(emailAddr);
-        return ResponseEntity.ok("이메일을 확인하세요");
+//        emailService.sendMail(emailAddr);
+        return ResponseEntity.ok("RESULT");
     }
 
     // 이메일 인증번호를 받은 후, 해당 이메일 인증번호를 검증하는 api
-    @PostMapping("/verifycode/{emailAddr}")
+    @PostMapping("/{emailAddr:.+}")
     public ResponseEntity<String> sendEmailAndCode(@PathVariable String emailAddr, @RequestBody EmailRequestDTO emailRequestDTO) throws NoSuchAlgorithmException {
         log.info("emailAddr : {}", emailAddr);
         if(emailService.verifyEmailCode(emailAddr, emailRequestDTO.getCode())) {

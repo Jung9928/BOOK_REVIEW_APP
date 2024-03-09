@@ -19,11 +19,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -42,6 +43,14 @@ public class AccountController {
         return ResponseResultCode.success(MemberSignupResponseDTO.getMemberField(memberDTO));
     }
 
+    // 회원가입 시, 아이디 중복확인
+    @GetMapping("/verifyId/{memberId}")
+    public String verifyId(@PathVariable("memberId") String memberId) {
+        log.info("memberId : " + memberId);
+        MemberDTO memberDTO = memberService.getMemberByMemberId(memberId);
+
+        return memberDTO.getMemberId();
+    }
 
     // 로그인
 //    @PostMapping("/login")

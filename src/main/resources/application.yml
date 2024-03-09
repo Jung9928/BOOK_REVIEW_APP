@@ -36,8 +36,8 @@ spring.data:
 spring.mail:
   host: smtp.naver.com              # smtp 서버 주소
   port: 465
-  username : fg43irks@naver.com
-  password: gozldWKf99!
+  username :
+  password: 
   properties:
     mail:
       smtp:

@@ -67,7 +67,7 @@ public class EmailService {
         javaMailSender.send(emailForm);
     }
 
-    // 전송한 이메일과 코드가 일치하는지 검증
+    // 전송한 이메일과 코드가 일치하는지 redis에 key(이메일)값을 전달하여 value(인증코드) 검증
     public Boolean verifyEmailCode(String email, String verifyCode) {
         String foundVerifyCodeFromRedis = redisMailUtil.getData(email);
 

@@ -72,7 +72,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/v1/members/login", "/", "/api/v1/members/signup").permitAll()
+                        .requestMatchers("/api/v1/members/login", "/", "/api/v1/members/signup", "/api/v1/verifyEmail/*").permitAll()
                         .anyRequest().authenticated());
 
         // JWT 인증/인가를 사용하기 위한 설정
