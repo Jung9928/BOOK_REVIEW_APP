@@ -49,10 +49,10 @@ public class EmailService {
 
         message.addRecipients(Message.RecipientType.TO, email);
         message.setSubject("도서리뷰모아 이메일 인증 번호입니다.");
-        message.setFrom(verifyEmailSender);                                          // 인증 안내 메일 보내는 사랑
+        message.setFrom(verifyEmailSender);                                             // 인증 안내 메일 보내는 사랑
         message.setText("이메일 인증코드 : " + verifyCode, "UTF-8", "html");
 
-        redisMailUtil.setDataExpire(email, createEmailVerifyCode(), 60 * 30L);
+        redisMailUtil.setDataExpire(email, verifyCode, 60 * 3L);   // 인증번호 유효시간 3분
 
         return message;
     }
