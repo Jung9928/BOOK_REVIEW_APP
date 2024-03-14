@@ -37,7 +37,7 @@ spring.mail:
   host: smtp.naver.com              # smtp 서버 주소
   port: 587                         # IMAP/SMTP 설정
   username:
-  password: 
+  password:
   properties:
     mail:
       smtp:

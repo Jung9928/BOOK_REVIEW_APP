@@ -1,18 +1,18 @@
 <template>
   <div class="card shadow-sm">
-    <span class="img" :style="{backgroundImage: `url(${book.imgSrc})`}"/>
+    <span class="img" :style="{backgroundImage: `url(${book.imgPath})`}"/>
     <div class="card-body">
-      <p class="card-text">{{book.book_title}}</p>
+      <p class="card-text">{{book.title}}</p>
       <div class="d-flex justify-content-between align-items-center">
         <button class="btn btn-primary">알라딘</button>
         <button class="btn btn-primary">yes24</button>
         <button class="btn btn-primary">교보문고</button>
         <small class="price text-muted">
-          {{lib.getNumberFormatted(book.regular_price)}}원
+          {{lib.getNumberFormatted(book.origin_price)}}
         </small>
 
         <small class="discount text-danger">
-          {{lib.getNumberFormatted(book.selling_price)}}원
+          {{lib.getNumberFormatted(book.sale_price)}}원
         </small>
       </div>
     </div>

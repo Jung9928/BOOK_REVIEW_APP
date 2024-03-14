@@ -22,7 +22,7 @@ public class MemberDTO {
     private Timestamp registeredAt;
     private Timestamp modifiedAt;
 
-    // MemberEntity에 있는 필드들을 MemberJoinDTO 클래스로 변환하는 메소드
+    // MemberEntity에 있는 필드들을 MemberDTO 클래스로 변환하는 메소드
     public static MemberDTO entityToMemberDTO(MemberEntity memberEntity) {
         return new MemberDTO(
                 memberEntity.getId(),

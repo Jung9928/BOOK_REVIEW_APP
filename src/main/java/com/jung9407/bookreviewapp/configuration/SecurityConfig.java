@@ -2,7 +2,6 @@ package com.jung9407.bookreviewapp.configuration;
 
 import com.jung9407.bookreviewapp.exception.jwt.CustomAuthenticationEntryPoint;
 import com.jung9407.bookreviewapp.model.dao.RedisDAO;
-import com.jung9407.bookreviewapp.service.CustomMemberDetailsService;
 import com.jung9407.bookreviewapp.util.JwtProvider;
 import com.jung9407.bookreviewapp.util.filter.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,9 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.PortResolverImpl;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -74,11 +71,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers(
                                 "/api/v1/members/login",
-                                "/", "/api/v1/members/signup",
-                                "/api/v1/verifyEmail/*",
-                                "/api/v1/members/verifyId/*"
+                                "/api/v1/members/signup",
+                                "/api/v1/verifyEmail/**",
+                                "/api/v1/members/verifyId/**",
+                                "/api/v1/book/**",
+                                "/"
                                 ).permitAll()
                         .anyRequest().authenticated());
+
 
         // JWT 인증/인가를 사용하기 위한 설정
         http
