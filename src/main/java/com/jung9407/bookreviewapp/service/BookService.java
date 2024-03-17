@@ -1,24 +1,63 @@
 package com.jung9407.bookreviewapp.service;
 
+import com.jung9407.bookreviewapp.model.dto.BookPaginationDTO;
+import com.jung9407.bookreviewapp.model.dto.requestDTO.BookSearchConditionDTO;
+import com.jung9407.bookreviewapp.model.dto.responseDTO.BookPagingResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.BookResponseDTO;
 import com.jung9407.bookreviewapp.model.entity.BookEntity;
 import com.jung9407.bookreviewapp.repository.BookRepository;
+import com.jung9407.bookreviewapp.repository.BookRepositoryCustom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BookRepositoryCustom bookRepositoryCustom;
 
-    private static final int BAR_LENGTH = 5;
+
+    public BookPagingResponseDTO<List<BookResponseDTO>> getBookList(Pageable pageable, BookSearchConditionDTO bookSearchConditionDTO) {
+        List<BookResponseDTO> bookResponseDTOList = new ArrayList<>();
+
+        Page<BookEntity> bookEntities = bookRepositoryCustom.findAllBySearchCondition(pageable, bookSearchConditionDTO);
+
+        for (BookEntity bookEntity : bookEntities) {
+            BookResponseDTO bookResponseDTO = BookResponseDTO.builder()
+                    .book_id(bookEntity.getBook_id())
+                    .title(bookEntity.getTitle())
+                    .author(bookEntity.getAuthor())
+                    .publisher(bookEntity.getPublisher())
+                    .publishDate(bookEntity.getPublishDate())
+                    .rating(bookEntity.getRating())
+                    .regular_price(bookEntity.getRegular_price())
+                    .selling_price(bookEntity.getSelling_price())
+                    .main_category(bookEntity.getMain_category())
+                    .sub_category(bookEntity.getSub_category())
+                    .imgPath(bookEntity.getImgPath())
+                    .modifiedAt(bookEntity.getModifiedAt())
+                    .site(bookEntity.getSite())
+                    .build();
+
+            bookResponseDTOList.add(bookResponseDTO);
+        }
+
+        BookPaginationDTO bookPaginationDTO = new BookPaginationDTO(
+                (int) bookEntities.getTotalElements()
+                , pageable.getPageNumber() + 1
+                , pageable.getPageSize()
+                , 10
+        );
+
+        return BookPagingResponseDTO.OK(bookResponseDTOList, bookPaginationDTO);
+    }
+
 
 //    public List<BookResponseDTO> findAllBooks() {
 //        List<BookEntity> bookEntitiesList = bookRepository.findAll();
@@ -31,16 +70,22 @@ public class BookService {
 //        return bookResponseDTOList;
 //    }
 
-    //
-    @Transactional(readOnly = true)
-    public Page<BookResponseDTO> findBookList(String searchKeyword, Pageable pageable) {
-        if(searchKeyword == null || searchKeyword.isBlank()) {
-            return bookRepository.findAll(pageable).map(BookResponseDTO::entityToBookResponseDTO);
-        }
 
-        return bookRepository.findAllByTitle(searchKeyword, pageable).map(BookResponseDTO::entityToBookResponseDTO);
-//        return bookRepository.findAll(pageable).map(BookResponseDTO::entityToBookResponseDTO);
-    }
+
+
+    //
+//    @Transactional(readOnly = true)
+//    public Page<BookResponseDTO> findBookList(String searchKeyword, Pageable pageable) {
+//        if(searchKeyword == null || searchKeyword.isBlank()) {
+//            return bookRepository.findAll(pageable).map(BookResponseDTO::entityToBookResponseDTO);
+//        }
+//
+//        return bookRepository.findAllByTitle(searchKeyword, pageable).map(BookResponseDTO::entityToBookResponseDTO);
+////        return bookRepository.findAll(pageable).map(BookResponseDTO::entityToBookResponseDTO);
+//    }
+
+
+
 
 //    public Page<BookResponseDTO> paging(Pageable pageable) {
 //        int page = pageable.getPageNumber() - 1;    // PageRequest.of 메소드의 인자인 page 인덱스는 0부터 시작하므로 -1 처리
@@ -76,15 +121,6 @@ public class BookService {
 //        ));
 //    }
 
-    // Pagination bar
-    public List<Integer> getPaginationBarNumbers(int currentPageNumber, int totalPages) {
-        int startNumber = Math.max(currentPageNumber - (BAR_LENGTH / 2), 0);
-        int endNumber = Math.min(startNumber + BAR_LENGTH, totalPages);
 
-        return IntStream.range(startNumber, endNumber).boxed().toList();
-    }
 
-    public int currentBarLength() {
-        return BAR_LENGTH;
-    }
 }

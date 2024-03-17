@@ -31,14 +31,20 @@ public class BookEntity {
     @Column(name = "publish_date")
     private Timestamp publishDate;
 
-    @Column(length = 1000)
+    @Column(length = 20)
     private String rating;
 
     @Column
-    private String origin_price;
+    private String regular_price;
 
     @Column
-    private String sale_price;
+    private String selling_price;
+
+    @Column(name = "main_ctg_num")
+    private String main_category;
+
+    @Column(name = "sub_stg_num")
+    private String sub_category;
 
     @Column(name = "img_path")
     private String imgPath;

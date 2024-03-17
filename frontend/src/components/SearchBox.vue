@@ -1,6 +1,16 @@
 <template>
   <div class="search-container">
-    <input v-model="searchQuery" type="text" placeholder="검색어를 입력하세요...">
+    <!-- 검색 카테고리 선택 드롭다운 메뉴 -->
+    <select v-model="searchCategory" class="search-category">
+      <option value="title">제목</option>
+      <option value="author">저자</option>
+      <option value="publisher">출판사</option>
+    </select>
+
+    <!-- 검색어 입력란 -->
+    <input v-model="searchValue" type="text" placeholder="도서 제목을 입력하세요..." @keyup.enter="search" class="search-input">
+
+    <!-- 검색 버튼 -->
     <button @click="search" type="button" class="search-btn">검색</button>
   </div>
 </template>
@@ -18,13 +28,14 @@ export default {
     }
   },
   setup(props) {
-    const searchQuery = ref(''); // 검색어를 담을 ref 변수
+    const searchValue = ref(''); // 검색어를 담을 ref 변수
+    const searchCategory = ref(''); // 검색 카테고리를 담을 ref 변수 (기본값: 제목)
 
-    // 검색 버튼을 클릭했을 때 호출되는 메소드
-    const search = () => {props.onSearch(searchQuery.value); // 검색어를 부모 컴포넌트로 전달
+    // 검색 버튼을 클릭 or enter 키를 눌렀을 때 호출되는 메소드
+    const search = () => {props.onSearch(searchValue.value, searchCategory.value); // 검색어와 카테고리를 부모 컴포넌트로 전달
     };
 
-    return { searchQuery, search }; // 외부로 노출할 변수와 메소드 반환
+    return { searchValue, search, searchCategory }; // 외부로 노출할 변수와 메소드 반환
   }
 }
 </script>
@@ -37,12 +48,15 @@ export default {
   margin-top: 20px;
 }
 
-.search-container input[type="text"] {
-  width: 300px;
+.search-container select, .search-container input[type="text"] {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-right: 10px;
+}
+
+.search-input {
+  width: calc(15%); /* 입력란 좌우 너비 조절 */
 }
 
 .search-container .search-btn {
