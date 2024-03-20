@@ -43,7 +43,7 @@ public class BookEntity {
     @Column(name = "main_ctg_num")
     private String main_category;
 
-    @Column(name = "sub_stg_num")
+    @Column(name = "sub_ctg_num")
     private String sub_category;
 
     @Column(name = "img_path")

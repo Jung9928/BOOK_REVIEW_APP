@@ -3,15 +3,16 @@
     <div class="sidebar">
       <hr> <!-- 가로줄 추가 -->
       <ul>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003031')">컴퓨터 공학</a></li>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003019')">컴퓨터 입문/활용</a></li>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003023')">모바일 프로그래밍</a></li>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003022')">프로그래밍 언어</a></li>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003020')">웹사이트</a></li>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003025')">OS/데이터베이스</a></li>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003027')">게임</a></li>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003024')">네트워크/해킹/보안</a></li>
-        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="searchBooks('001001003028')">그래픽/디자인/멀티미디어</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('')">전체</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003031')">컴퓨터 공학</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003019')">컴퓨터 입문/활용</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003023')">모바일 프로그래밍</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003022')">프로그래밍 언어</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003020')">웹사이트</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003025')">OS/데이터베이스</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003027')">게임</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003024')">네트워크/해킹/보안</a></li>
+        <li><a href="#" @mouseover="increaseFontSize" @mouseleave="decreaseFontSize" @click="selectMainCategory('001001003028')">그래픽/디자인/멀티미디어</a></li>
       </ul>
     </div>
     <div class="content">
@@ -56,20 +57,27 @@ export default {
     const bookList = ref([]);
     const currentPage = ref(1);
     const totalPages = ref(0);
-    const seletedCategory = ref("");
+    const selectedMainCategory = ref("");
+
+    // 사이드 바 메뉴 선택 시
+    const selectMainCategory = (category) => {
+      selectedMainCategory.value = category;     // 선택한 main 카테고리 값 셋팅
+      fetchBooks();                             // 선택한 카테고리에 해당하는 도서 데이터 get
+    }
 
     // 검색 버튼 클릭 시, 카테고리, 검색 데이터 전달
-    const searchBooks = (searchValue, searchSubCategory, searchMainCategory) => {
-      fetchBooks(searchValue, searchSubCategory, searchMainCategory);
+    const searchBooks = (searchValue, searchSubCategory) => {
+      fetchBooks(searchValue, searchSubCategory);
     };
 
-    const fetchBooks = (searchValue, searchSubCategory, searchMainCategory) => {
+    // 도서 리스트 get
+    const fetchBooks = (searchValue, searchSubCategory) => {
       const params = {
         page: currentPage.value,
         size: 10, // 페이지당 아이템 수
         searchValue: searchValue,
-        searchSubCategory: searchSubCategory,
-        searchMainCategory: searchMainCategory
+        searchSubCategory: searchSubCategory,               // 선택한 서브 카테고리 전달
+        searchMainCategory: selectedMainCategory.value       // 선택한 메인 카테고리 전달
       };
 
       axios.get(`/api/v1/book/list`, { params })
@@ -131,7 +139,7 @@ export default {
 
     fetchBooks(); // 페이지가 로드될 때 처음에도 데이터를 가져옴
 
-    return { bookList, currentPage, totalPages, prevPage, nextPage, searchBooks, displayedPages, gotoPage };
+    return { bookList, currentPage, totalPages, prevPage, nextPage, searchBooks, displayedPages, gotoPage, selectMainCategory };
   },
 }
 </script>
@@ -163,12 +171,16 @@ export default {
 .sidebar ul li a {
   text-decoration: none;
   color: #333;
-  transition: font-size 0.2s; /* 글씨 크기 변화에 대한 전환 효과 */
+  transition: all 0.3s; /* 글씨 크기 변화에 대한 전환 효과 */
 }
 
 .sidebar ul li a:hover {
   cursor: pointer; /* 마우스 호버 시 커서 모양 변경 */
   font-weight: bold; /* 마우스 호버 시 글씨 굵게 */
+}
+
+.sidebar ul li.active a {
+  transform: scale(1.1); /* 선택된 메뉴를 1.1배 확대 */
 }
 
 .content {
