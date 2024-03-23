@@ -19,8 +19,8 @@ public class ReviewEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int review_id;
 
-    @Column(length = 100)
-    private int book_id;
+    @Column(name = "book_id", length = 100)
+    private int bookId;
 
     @Column
     private String review_title;

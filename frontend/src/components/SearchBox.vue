@@ -11,7 +11,7 @@
     <input v-model="searchValue" type="text" placeholder="도서 제목을 입력하세요..." @keyup.enter="search" class="search-input">
 
     <!-- 검색 버튼 -->
-    <button @click="search" type="button" class="search-btn">검색</button>
+    <button @click="search" type="button" class="btn btn-outline-dark" style="width: 70px; height: 46px">검색</button>
   </div>
 </template>
 

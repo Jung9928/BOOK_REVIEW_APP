@@ -27,13 +27,19 @@
           <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-center">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button class="page-link" @click="prevPage">이전</button>
+                <button class="page-link" @click="goFirstPage">&laquo;</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button class="page-link" @click="prevPage">&lt;</button>
               </li>
               <li class="page-item" v-for="page in displayedPages" :key="page" :class="{ active: currentPage === page }">
                 <button class="page-link" @click="gotoPage(page)">{{ page }}</button>
               </li>
               <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                <button class="page-link" @click="nextPage">다음</button>
+                <button class="page-link" @click="nextPage">&gt;</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button class="page-link" @click="goLastPage">&raquo;</button>
               </li>
             </ul>
           </nav>
@@ -74,7 +80,7 @@ export default {
     const fetchBooks = (searchValue, searchSubCategory) => {
       const params = {
         page: currentPage.value,
-        size: 10, // 페이지당 아이템 수
+        size: 9, // 페이지당 아이템 수
         searchValue: searchValue,
         searchSubCategory: searchSubCategory,               // 선택한 서브 카테고리 전달
         searchMainCategory: selectedMainCategory.value       // 선택한 메인 카테고리 전달
@@ -94,6 +100,25 @@ export default {
           });
     };
 
+    // 맨 첫페이지 이동
+    const goFirstPage = () => {
+      if (currentPage.value !== 1) {
+        currentPage.value = 1;
+        fetchBooks();
+      }
+    };
+
+    // 맨 마지막 페이지 이동
+    const goLastPage = () => {
+      if (currentPage.value !== totalPages.value) {
+        currentPage.value = totalPages.value;
+        fetchBooks();
+      } else {
+        window.alert("현재 페이지가 마지막 페이지 입니다");
+      }
+    };
+
+    // 이전 페이지 이동
     const prevPage = () => {
       if (currentPage.value > 1) {
         currentPage.value--;
@@ -101,6 +126,7 @@ export default {
       }
     };
 
+    // 다음 페이지 이동
     const nextPage = () => {
       if (currentPage.value < totalPages.value) {
         currentPage.value++;
@@ -108,6 +134,7 @@ export default {
       }
     };
 
+    // 페이지 선택하여 이동
     const gotoPage = (page) => {
       currentPage.value = page;
       fetchBooks();
@@ -139,7 +166,19 @@ export default {
 
     fetchBooks(); // 페이지가 로드될 때 처음에도 데이터를 가져옴
 
-    return { bookList, currentPage, totalPages, prevPage, nextPage, searchBooks, displayedPages, gotoPage, selectMainCategory };
+    return {
+      bookList,
+      currentPage,
+      totalPages,
+      goFirstPage,
+      goLastPage,
+      prevPage,
+      nextPage,
+      searchBooks,
+      displayedPages,
+      gotoPage,
+      selectMainCategory
+    };
   },
 }
 </script>

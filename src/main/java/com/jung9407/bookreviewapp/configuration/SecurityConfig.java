@@ -50,7 +50,7 @@ public class SecurityConfig {
 
                         configuration.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));    // 프론트 서버 포트 접근 허용
                         configuration.setAllowedMethods(Collections.singletonList("*"));                        // GET/POST/PUT/DELETE 등 모든 메소드 허용
-                        configuration.setAllowCredentials(true);                                                // 프론트 layer에서 Credential 설정을 헀다면 true로 설정
+                        configuration.setAllowCredentials(true);                                                // 프론트 layer에서 Credential 설정을 헀다면 true로 설정 (쿠키 사용시 필요)
                         configuration.setAllowedHeaders(Collections.singletonList("*"));                        // 모든 헤더 허용
                         configuration.setMaxAge(3600L);                                                         // 허용 상태 유지 시간
 

@@ -1,6 +1,5 @@
 package com.jung9407.bookreviewapp.model.dto.responseDTO;
 
-import com.jung9407.bookreviewapp.model.dto.BookPaginationDTO;
 import com.jung9407.bookreviewapp.model.dto.ReviewPaginationDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

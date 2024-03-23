@@ -80,12 +80,12 @@ public class JwtProvider {
         // 액세스 토큰 만료시간
         Date expiration = Jwts.parserBuilder().setSigningKey(getKey(secretKey)).build().parseClaimsJws(accessToken).getBody().getExpiration();
 
-        System.out.println("액세스 토큰 만료시간 : " + expiration);
+        log.info("액세스 토큰 만료시간 : " + expiration);
 
         // 현재시간
         long now = new Date().getTime();
 
-        System.out.println("현재 시간 : " + now);
+        log.info("현재 시간 : " + now);
 
         return (expiration.getTime() - now);
     }
@@ -140,7 +140,7 @@ public class JwtProvider {
         try {
             // 주어진 토큰 파싱을 위해 JWT 파서를 설정하고 서명키를 설정한 뒤, 토큰 파싱하여 JWT 서명(signature)검사 수행.
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(getKey(secretKey)).build().parseClaimsJws(token);
-            System.out.println("claims : " + claims);
+            log.info("claims : " + claims);
             return true;        // 토큰이 유효하면 true
         } catch (ExpiredJwtException e) {
             log.info("JWT Expired, 만료된 토큰입니다.");

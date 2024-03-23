@@ -11,6 +11,7 @@ import com.jung9407.bookreviewapp.model.dto.responseDTO.MemberLoginResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.MemberSignupResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.ResponseResultCode;
 
+import com.jung9407.bookreviewapp.model.entity.MemberEntity;
 import com.jung9407.bookreviewapp.repository.MemberRepository;
 import com.jung9407.bookreviewapp.service.MemberService;
 import com.jung9407.bookreviewapp.util.JwtProvider;
@@ -79,11 +80,12 @@ public class AccountController {
 //    }
 
 
+    // 로그인
     @PostMapping("/login")
     public ResponseResultCode<MemberLoginResponseDTO> login(@RequestBody MemberLoginRequestDTO memberLoginRequestDTO, HttpServletResponse response) {
         TokenResponseDTO tokenResponseDTO = memberService.login(memberLoginRequestDTO, response);
-        System.out.println("access token : " + tokenResponseDTO.getAccessToken());
-        System.out.println("refresh token : " + tokenResponseDTO.getRefreshToken());
+        log.info("access token : " + tokenResponseDTO.getAccessToken());
+        log.info("refresh token : " + tokenResponseDTO.getRefreshToken());
 
         return ResponseResultCode.success(new MemberLoginResponseDTO(tokenResponseDTO.getAccessToken(), tokenResponseDTO.getRefreshToken()));
     }
@@ -93,6 +95,7 @@ public class AccountController {
     public ResponseEntity logout(@AuthenticationPrincipal CustomMemberDetails customMemberDetails, HttpServletRequest request) {
 
         String accessToken = jwtProvider.getTokenFromHeader(request);
+        log.info("access token : " + accessToken);
         return memberService.logout(accessToken, customMemberDetails.getUsername());        // getUsername() : memberId
     }
 

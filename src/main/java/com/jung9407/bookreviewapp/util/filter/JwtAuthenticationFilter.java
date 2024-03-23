@@ -7,6 +7,7 @@ import com.jung9407.bookreviewapp.util.JwtProvider;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -29,10 +32,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+
         String token = jwtProvider.getTokenFromHeader(request);
+        log.info("token : " + token);
 
         if(token != null) {
             String blackList = redisDAO.getBlackList(token);
+            log.info("blackList : " + blackList);
 
             if(blackList != null) {
                 if(blackList.equals("logout")) {
@@ -48,6 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 검증 후, 인증 객체를 생성하여 securityContextHolder에서 관리
             Claims memberInfo = jwtProvider.getMemberInfoFromToken(token);
+            log.info("memberInfo.getSubject() : " + memberInfo.getSubject());
             setAuthentication(memberInfo.getSubject());         // subject = memberId
         }
         filterChain.doFilter(request, response);

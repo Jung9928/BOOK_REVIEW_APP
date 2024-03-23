@@ -17,9 +17,9 @@ public class RedisDAO {
     private final RedisTemplate<String, String> redisTemplate;
 
     /**
-     * @param : memberId (key)
-     * @param : refreshToken
-     * @param : refreshTokenTime
+     * @param : memberId         (key)
+     * @param : refreshToken     (리프레시 토큰) -> value
+     * @param : refreshTokenTime (리프레시 토큰 유효시간)
      * */
 
     public void setRefreshToken(String memberId, String refreshToken, long refreshTokenTime) {
@@ -32,7 +32,7 @@ public class RedisDAO {
     }
 
     /**
-     * 키로 값을 조회
+     * key로 값을 조회
      * @param : memberId (key)
      * @return 해당 리프레쉬 토큰
      * */
@@ -41,7 +41,7 @@ public class RedisDAO {
     }
 
     /**
-     * 키로 값을 삭제
+     * key에 해당하는 refreshToken (value) 값을 삭제
      * @param : memberId (key)
      * */
     public void deleteRefreshToken(String memberId) {
@@ -52,6 +52,10 @@ public class RedisDAO {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
+    /**
+     * 클라이언트에서 로그아웃 시도 시, 해당 유저의 accessToken을 key값으로 "logout"이라는 문자열을 value로 Redis에 저장
+     * minutes : 로그아웃을 시도한 유저의 accessToken 유효시간
+     * */
     public void setBlackList(String accessToken, String message, Long minutes) {
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(message.getClass()));
         redisTemplate.opsForValue().set(accessToken, message, minutes, TimeUnit.MINUTES);

@@ -66,7 +66,7 @@
               <!-- 나머지 입력 폼들 ... -->
 
               <div class="mb-3">
-                <button type="submit" class="btn btn-primary w-100" @click="signup">회원 가입</button>
+                <button type="submit" class="btn btn-outline-dark w-100" @click="signup">회원 가입</button>
               </div>
             </form>
           </div>

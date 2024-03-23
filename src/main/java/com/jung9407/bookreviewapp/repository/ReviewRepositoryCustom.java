@@ -35,7 +35,8 @@ public class ReviewRepositoryCustom {
         List<ReviewEntity> results = query
                 .where(searchBookId(reviewSearchConditionDTO.getBookId()),
                         searchReviewSite(reviewSearchConditionDTO.getReviewSite()))
-                .offset(pageable.getOffset())
+//                .offset(pageable.getOffset())
+                .offset(((long)(pageable.getPageNumber()-1)* pageable.getPageSize()))
                 .limit(pageable.getPageSize())
                 .orderBy(reviewEntity.reviewDate.desc())
                 .fetch();
@@ -44,7 +45,7 @@ public class ReviewRepositoryCustom {
     }
 
     private BooleanExpression searchBookId(int book_id) {
-        return reviewEntity.book_id.eq(book_id);
+        return reviewEntity.bookId.eq(book_id);
     }
 
     private BooleanExpression searchReviewSite(String review_site) {

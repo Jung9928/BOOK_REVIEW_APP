@@ -9,9 +9,12 @@ import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.jwt.TokenResponseDTO;
 import com.jung9407.bookreviewapp.model.entity.MemberEntity;
 import com.jung9407.bookreviewapp.repository.MemberRepository;
+import com.jung9407.bookreviewapp.util.CookieUtils;
 import com.jung9407.bookreviewapp.util.JwtProvider;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -29,6 +33,8 @@ public class MemberService {
 
     private final BCryptPasswordEncoder encoder;
 
+    private final CookieUtils cookieUtils;
+
     // ====================================================
     // 추후, 변경 용이를 위해 yml 또는 properties 파일에서
     // jwt 값을 @Value를 사용하여 yml파일로부터 가져오도록 구현
@@ -36,8 +42,8 @@ public class MemberService {
     @Value("${jwt.secret-key}")
     private String secretKey;
 
-    @Value("${jwt.token.expired-time-ms}")
-    private Long expiredTimeMs;
+    @Value("${jwt.live.atk}")
+    private int accessToken;           // millisecond
 
 
 //    public void signup(MemberJoinDTO memberJoinDTO) {
@@ -92,9 +98,12 @@ public class MemberService {
     @Transactional
     public TokenResponseDTO login(MemberLoginRequestDTO memberLoginRequestDTO, HttpServletResponse response) {
 
-        System.out.println("memberId : " + memberLoginRequestDTO.getMemberId());
-        System.out.println("password : " + memberLoginRequestDTO.getPassword());
+        log.info("memberId : " + memberLoginRequestDTO.getMemberId());
+        log.info("password : " + memberLoginRequestDTO.getPassword());
 
+        // ========================
+        // 1. 로그인 과정에서 검증 작업
+        // ========================
         // 회원가입 여부 체크
         MemberEntity memberEntity = memberRepository.findByMemberId(memberLoginRequestDTO.getMemberId()).orElseThrow(() ->
                 new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s는 가입되어있지않은 ID입니다.", memberLoginRequestDTO.getMemberId())));
@@ -104,9 +113,22 @@ public class MemberService {
             throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 
+        // ========================
+        // 2. 로그인 성공 이후 작업
+        // ========================
         // 토큰 생성
         TokenResponseDTO tokenResponseDTO = jwtProvider.generateTokenByLogin(memberEntity.getMemberId(), memberEntity.getMemberRole(), secretKey);
-        response.addHeader("Authorization", tokenResponseDTO.getAccessToken());     // 헤더에 액세스 토큰만 저장.
+
+        // 쿠키 생성 후, access/refresh 토큰을 쿠키에 저장 (2024-03-23 추가)
+        Cookie accessToken = cookieUtils.createCookie("Auth", tokenResponseDTO.getAccessToken());
+        Cookie refreshToken = cookieUtils.createCookie("Refresh", tokenResponseDTO.getRefreshToken());
+
+
+//        response.addHeader("Authorization", tokenResponseDTO.getAccessToken());     // 헤더에 액세스 토큰만 저장.
+
+        // 쿠키를 response에 담아서 리턴 (2024-03-23 추가)
+        response.addCookie(accessToken);
+        response.addCookie(refreshToken);
 
         return tokenResponseDTO;
     }

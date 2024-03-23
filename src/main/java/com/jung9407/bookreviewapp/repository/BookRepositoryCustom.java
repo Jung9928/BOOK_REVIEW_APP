@@ -36,8 +36,11 @@ public class BookRepositoryCustom {
         List<BookEntity> results = query
                 .where(searchMainKeywords(bookSearchConditionDTO.getSearchSubCategory()),
                         searchSubKeywords(bookSearchConditionDTO.getSearchSubCategory(), bookSearchConditionDTO.getSearchValue()))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                // 페이지 번호
+                // 프론트에서 맨 처음 로딩 시, 1페이지 값을 전달하므로 getPageNumber에 -1하여 offset 첫 값을 0설정
+                // ex) limit(0, 10) -> limit(10, 10) -> limit(20, 10)
+                .offset(((long)(pageable.getPageNumber()-1) * pageable.getPageSize()))
+                .limit(pageable.getPageSize())      // 페이지에 표시할 도서 갯수
                 .orderBy(bookEntity.publishDate.desc())
                 .fetch();
 
