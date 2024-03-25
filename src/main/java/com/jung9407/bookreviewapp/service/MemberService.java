@@ -102,7 +102,7 @@ public class MemberService {
         log.info("password : " + memberLoginRequestDTO.getPassword());
 
         // ========================
-        // 1. 로그인 과정에서 검증 작업
+        // 1. 로그인 과정에서 회원정보 검증 작업
         // ========================
         // 회원가입 여부 체크
         MemberEntity memberEntity = memberRepository.findByMemberId(memberLoginRequestDTO.getMemberId()).orElseThrow(() ->
@@ -113,21 +113,25 @@ public class MemberService {
             throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 
-        // ========================
-        // 2. 로그인 성공 이후 작업
-        // ========================
+        // ================================
+        // 2. 회원정보 검증결과 정상일 경우 작업
+        // ================================
         // 토큰 생성
         TokenResponseDTO tokenResponseDTO = jwtProvider.generateTokenByLogin(memberEntity.getMemberId(), memberEntity.getMemberRole(), secretKey);
 
-        // 쿠키 생성 후, access/refresh 토큰을 쿠키에 저장 (2024-03-23 추가)
-        Cookie accessToken = cookieUtils.createCookie("Auth", tokenResponseDTO.getAccessToken());
+//        log.info("accessToken 만료 시간 : " );
+        // 쿠키 생성 후, refresh 토큰을 쿠키에 저장 (2024-03-23 추가)
+        // accessToken 헤더 명 : Authorization
+        // refreshToken 쿠키 명 : Refresh
+
+//        Cookie accessToken = cookieUtils.createCookie("Access", tokenResponseDTO.getAccessToken());
         Cookie refreshToken = cookieUtils.createCookie("Refresh", tokenResponseDTO.getRefreshToken());
 
 
-//        response.addHeader("Authorization", tokenResponseDTO.getAccessToken());     // 헤더에 액세스 토큰만 저장.
-
         // 쿠키를 response에 담아서 리턴 (2024-03-23 추가)
-        response.addCookie(accessToken);
+//        response.addCookie(accessToken);
+        // header에 accessToken 저장
+        response.addHeader("Authorization", tokenResponseDTO.getAccessToken());     // 헤더에 Access 토큰만 저장.
         response.addCookie(refreshToken);
 
         return tokenResponseDTO;

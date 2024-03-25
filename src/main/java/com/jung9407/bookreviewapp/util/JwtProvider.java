@@ -114,7 +114,7 @@ public class JwtProvider {
 
         redisDAO.setRefreshToken(memberId, refreshToken, rtkLive);
 
-        return new TokenResponseDTO(accessToken, refreshToken);
+        return new TokenResponseDTO(accessToken, refreshToken, memberId);
     }
 
     // 필터 단계에서 검증된 RTK에서 꺼낸 memberId가 Redis 인메모리에 존재하는지 확인 후, ATK, RTK 재발급 진행
@@ -125,14 +125,14 @@ public class JwtProvider {
         }
 
         String accessToken = generateToken(memberId, memberRole, secretKey, atkLive);
-        String refreshToken = generateToken(memberId, memberRole, secretKey, atkLive);
+        String refreshToken = generateToken(memberId, memberRole, secretKey, rtkLive);
         redisDAO.setRefreshToken(memberId, refreshToken, rtkLive);
 
-        return new TokenResponseDTO(accessToken, refreshToken);
+        return new TokenResponseDTO(accessToken, refreshToken, memberId);
     }
 
     /**
-     * Header에서 가져온 토큰 검증 메소드
+     * Cookie에서 가져온 토큰 검증 메소드
      * @param : token
      * @return
      * */
@@ -147,7 +147,7 @@ public class JwtProvider {
         } catch (SecurityException | MalformedJwtException | UnsupportedJwtException e) {   // 권한이 없다면
             log.info("Invalid JWT, 유효하지 않은 토큰 입니다.");
         } catch (IllegalArgumentException e) {                                              // JWT가 올바르게 구성되지 않았다면
-            log.info("JWT claims is empty, 잘못된 토큰 입니다.");
+            log.info("JWT claims is empty, 잘못된 토큰형식 입니다.");
         }
 
         return false;

@@ -22,7 +22,14 @@
         <li class="nav-item"><a href="/" class="nav-link link-dark px-2">삭제/문의</a></li>
       </ul>
       <ul class="nav">
-        <li class="nav-item"><a href="/login" class="nav-link link-dark px-2">로그인</a></li>
+        <li class="nav-item" v-if="!isLoggedIn">
+          <a href="/login" class="nav-link link-dark px-2">로그인</a>
+        </li>
+
+        <li class="nav-item" v-else>
+          <a href="/logout" class="nav-link link-dark px-2">로그아웃</a>
+        </li>
+
         <li class="nav-item"><a href="/signup" class="nav-link link-dark px-2">회원가입</a></li>
       </ul>
     </div>
@@ -30,21 +37,27 @@
 </template>
 
 <script>
-import store from "@/scripts/store";
+// import store from "@/scripts/store";
 import router from "@/scripts/router";
 import axios from "axios";
+import { computed } from "vue";
+import { useStore } from 'vuex';
 
 export default {
   name: 'Header',
   setup() {
+    const store = useStore();
+
+    const isLoggedIn = computed(() => store.getters.isLoggedIn);
+
     const logout = ()=> {
       axios.post("/api/v1/members/logout").then(()=> {
-        store.commit('setAccessToken', 0);
+        store.dispatch('logout');
         router.push({path:"/"});
       })
     }
 
-    return {logout };
+    return { isLoggedIn, logout };
   },
 }
 </script>

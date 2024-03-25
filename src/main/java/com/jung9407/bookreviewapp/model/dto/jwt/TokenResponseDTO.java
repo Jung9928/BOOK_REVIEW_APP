@@ -11,8 +11,11 @@ public class TokenResponseDTO {
     private final String accessToken;
     private final String refreshToken;
 
-    public TokenResponseDTO(String accessToken, String refreshToken) {
+    private final String memberId;
+
+    public TokenResponseDTO(String accessToken, String refreshToken, String memberId) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        this.memberId = memberId;
     }
 }

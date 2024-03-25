@@ -36,16 +36,16 @@ export default {
       }
     });
 
-    // const submit = ()=> {
-    //   axios.post("/api/v1/members/login", state.form).then((res) => {
-    //     store.commit('setAccount', res.data);   // 로그인 시, 로그인한 id를 store.js에 저장.
-    //     sessionStorage.setItem("id", res.data);
-    //     router.push({path:"/"});
-    //     window.alert("로그인하셨습니다.");
-    //   }).catch(() => {
-    //     window.alert("로그인 정보가 존재하지 않습니다..");
-    //   });
-    // }
+    // JWT access 토큰 디코딩 및 exp 클레임 추출 함수
+    function decodeJWT(accessToken) {
+      const base64Url = accessToken.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      return JSON.parse(jsonPayload);
+    }
 
     const submit = ()=> {
       axios.post("/api/v1/members/login", state.form, {
@@ -56,21 +56,25 @@ export default {
       })
           .then((res) => {
             // 성공했을 경우
-            const accessToken = res.data;
-            const refreshToken = res.data;
-            store.commit('setAccessToken', res.data);
-            sessionStorage.setItem("accessToken", res.data);
+            const accessToken = res.headers.get("Authorization");
+            console.log("accessToken : " + accessToken);
+
+            // 토큰 디코딩 및 유효 시간 확인
+            const decodedToken = decodeJWT(accessToken);
+            console.log("토큰 유효 시간 : ", new Date(decodedToken.exp * 1000));
+
+            // 로그인 액션 호출하여 로그인 상태 변경
+            store.dispatch('login', true);
+
             router.push({path:"/"});
-            window.alert("로그인하셨습니다.", res.data);
+            window.alert("로그인하셨습니다.");
 
             // saveAuthToCookie(accessToken);
             // saveUserToCookie(refreshToken);
-
           })
           .catch((res) => {
             // 실패했을 경우
-            console.log(state);
-            console.log(res.data);
+            console.error("Error message : " + res);
             window.alert("회원이 아닙니다. 회원가입 후, 로그인 바랍니다.", res);
           })
     };

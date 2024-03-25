@@ -9,17 +9,29 @@ import org.springframework.stereotype.Component;
 public class CookieUtils {
 
     @Value("${jwt.live.rtk}")
-    private int refreshToken;           // millisecond
+    private int refreshToken;
+
+    @Value("${jwt.live.atk}")
+    private int accessToken;
 
     public Cookie createCookie(String cookieName, String value) {
         Cookie cookie = new Cookie(cookieName, value);
 
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(refreshToken);
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
+
+        if(cookieName.equals("Access")) {
+            cookie.setMaxAge(accessToken);
+        } else if(cookieName.equals("Refresh")) {
+            cookie.setMaxAge(refreshToken);
+        }
+
         cookie.setPath("/");
 
         return cookie;
     }
+
 
     public Cookie getCookie(HttpServletRequest request, String cookieName) {
         Cookie[] cookies = request.getCookies();

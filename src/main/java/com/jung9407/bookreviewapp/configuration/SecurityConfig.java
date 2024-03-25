@@ -2,6 +2,8 @@ package com.jung9407.bookreviewapp.configuration;
 
 import com.jung9407.bookreviewapp.exception.jwt.CustomAuthenticationEntryPoint;
 import com.jung9407.bookreviewapp.model.dao.RedisDAO;
+import com.jung9407.bookreviewapp.model.dto.MemberDTO;
+import com.jung9407.bookreviewapp.util.CookieUtils;
 import com.jung9407.bookreviewapp.util.JwtProvider;
 import com.jung9407.bookreviewapp.util.filter.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +31,8 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
 
     private final RedisDAO redisDAO;
+
+    private final CookieUtils cookieUtils;
 
     // 비번 암호화
     @Bean
@@ -82,7 +86,7 @@ public class SecurityConfig {
 
         // JWT 인증/인가를 사용하기 위한 설정
         http
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisDAO), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisDAO, cookieUtils), UsernamePasswordAuthenticationFilter.class);
 
         // 401 Error 처리, Authorization(인증)과정에서 실패할 시 처리
         http

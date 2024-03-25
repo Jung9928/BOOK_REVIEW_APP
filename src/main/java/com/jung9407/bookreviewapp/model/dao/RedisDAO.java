@@ -21,11 +21,10 @@ public class RedisDAO {
      * @param : refreshToken     (리프레시 토큰) -> value
      * @param : refreshTokenTime (리프레시 토큰 유효시간)
      * */
-
     public void setRefreshToken(String memberId, String refreshToken, long refreshTokenTime) {
         // 리프레시 토큰 직렬화 -> 부수적인 데이터 압축효과 얻음
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(refreshToken.getClass()));
-        redisTemplate.opsForValue().set(memberId, refreshToken, refreshTokenTime, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(memberId, refreshToken, refreshTokenTime, TimeUnit.SECONDS);
 
         // opsForValue() : RedisTemplate에서 ValueOperations를 가져옴
         // ValueOperations 객체를 통해 Redis의 값 저장, 조회, 삭제 작업 수행

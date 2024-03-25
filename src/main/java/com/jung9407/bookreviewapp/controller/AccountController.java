@@ -87,7 +87,8 @@ public class AccountController {
         log.info("access token : " + tokenResponseDTO.getAccessToken());
         log.info("refresh token : " + tokenResponseDTO.getRefreshToken());
 
-        return ResponseResultCode.success(new MemberLoginResponseDTO(tokenResponseDTO.getAccessToken(), tokenResponseDTO.getRefreshToken()));
+        return ResponseResultCode.success(new MemberLoginResponseDTO(null, tokenResponseDTO.getRefreshToken()));
+//        return new ResponseEntity<>("Login Success", HttpStatus.OK);
     }
 
     // 로그아웃
