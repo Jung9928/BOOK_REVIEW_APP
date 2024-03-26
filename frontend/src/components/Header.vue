@@ -22,12 +22,12 @@
         <li class="nav-item"><a href="/" class="nav-link link-dark px-2">삭제/문의</a></li>
       </ul>
       <ul class="nav">
-        <li class="nav-item" v-if="!isLoggedIn">
-          <a href="/login" class="nav-link link-dark px-2">로그인</a>
+        <li class="nav-item" v-if="$store.state.isLoggedIn === false">
+          <router-link to="/login" class="nav-link link-dark px-2">로그인</router-link>
         </li>
 
-        <li class="nav-item" v-else>
-          <a href="/logout" class="nav-link link-dark px-2">로그아웃</a>
+        <li class="nav-item" @click="logout()" v-else>
+          <a to="/login" class="nav-link link-dark px-2">로그아웃</a>
         </li>
 
         <li class="nav-item"><a href="/signup" class="nav-link link-dark px-2">회원가입</a></li>
@@ -37,7 +37,6 @@
 </template>
 
 <script>
-// import store from "@/scripts/store";
 import router from "@/scripts/router";
 import axios from "axios";
 import { computed } from "vue";
@@ -48,16 +47,24 @@ export default {
   setup() {
     const store = useStore();
 
-    const isLoggedIn = computed(() => store.getters.isLoggedIn);
+    const isAccessToken = computed(() => store.getters.accessToken);
 
     const logout = ()=> {
-      axios.post("/api/v1/members/logout").then(()=> {
+      const {accessToken, memberId} = store.state;
+
+      axios.delete("/api/v1/members/logout", {
+        headers: {
+          Authorization: 'Bearer ' + `${accessToken}`
+        },
+        data: {accessToken, memberId}}).then(()=> {
+        console.log("로그아웃 후 accessToken : " + accessToken);
+        console.log("로그아웃 후 memberId : " + memberId);
         store.dispatch('logout');
-        router.push({path:"/"});
-      })
+        router.push({path: "/"});
+      });
     }
 
-    return { isLoggedIn, logout };
+    return { isAccessToken, logout };
   },
 }
 </script>

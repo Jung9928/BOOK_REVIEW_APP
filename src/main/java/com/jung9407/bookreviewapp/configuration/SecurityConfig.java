@@ -75,6 +75,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers(
                                 "/api/v1/members/login",
+                                "/api/v1/members/logout",
                                 "/api/v1/members/signup",
                                 "/api/v1/verifyEmail/**",
                                 "/api/v1/members/verifyId/**",

@@ -10,6 +10,7 @@ import com.jung9407.bookreviewapp.service.CustomMemberDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,6 +56,7 @@ public class JwtProvider {
      * */
     public String getTokenFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
+        log.info("bearerToken : " + bearerToken);
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
@@ -97,7 +99,7 @@ public class JwtProvider {
         //claims.put("memberId", jwtPayloadDTO.getMemberId());
 
         return Jwts.builder()
-                .claim("auth", memberRole)                                        // JWT에 사용자 역할 정보를 claim에 추가.
+                .claim("USER", memberRole)                                        // JWT에 사용자 역할 정보를 claim에 추가.
                 .setSubject(memberId)                                                   // JWT에 subject를 memberId로 설정
                 .setIssuedAt(new Date(System.currentTimeMillis()))                      // 토큰 발행일자
                 .setExpiration(new Date(System.currentTimeMillis() + expiredTimeMs))    // 토큰 유효기간
@@ -117,7 +119,7 @@ public class JwtProvider {
         return new TokenResponseDTO(accessToken, refreshToken, memberId);
     }
 
-    // 필터 단계에서 검증된 RTK에서 꺼낸 memberId가 Redis 인메모리에 존재하는지 확인 후, ATK, RTK 재발급 진행
+    // 필터 단계에서 검증된 RTK에서 꺼낸 memberId가 Redis에 존재하는지 확인 후, ATK, RTK 재발급 진행
     public TokenResponseDTO reissueAtk(String memberId, MemberRole memberRole, String reToken) {
         // 레디스에 저장된 리프레쉬 토큰 값을 가져와서 입력된 refreshToken과 같은 지 확인
         if(!redisDAO.getRefreshToken(memberId).equals(reToken)) {

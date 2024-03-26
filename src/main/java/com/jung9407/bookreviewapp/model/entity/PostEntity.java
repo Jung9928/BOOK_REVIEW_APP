@@ -30,7 +30,7 @@ public class PostEntity {
    private MemberEntity member;
 
    @Size(min = 2, max=40, message = "제목은 2자이상 40자 이하입니다.")
-   @Column(name = "title")
+   @Column(name = "title", nullable = false)
    private String title;
 
    @Column(name = "content", columnDefinition = "TEXT")

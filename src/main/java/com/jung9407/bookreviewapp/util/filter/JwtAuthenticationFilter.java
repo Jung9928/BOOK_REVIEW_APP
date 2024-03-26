@@ -42,22 +42,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.info("========= doFilterInternal 실행 시작 =========");
 
-//        String token = jwtProvider.getTokenFromHeader(request);
-//        log.info("token : " + token);
+        String token = jwtProvider.getTokenFromHeader(request);
+        log.info("token : " + token);
 
-        // 1. 쿠키에서 accessToken 가져오기
-        Cookie accessCookie = cookieUtils.getCookie(request, "Authorization");
-        log.info("accessCookie : " + accessCookie);
+        // 1. Header에서 accessToken 가져오기
+//        Cookie accessCookie = cookieUtils.getCookie(request, "Authorization");
+//        log.info("accessCookie : " + accessCookie);
 
-        // 2. accessToken 값 cookie에 존재하면
-        String token = "";
-        if(accessCookie != null) {
+        // 2. accessToken 값이 존재하면
+//        String token = "";
+        if(token != null) {
 
             // 3. accessToken이 블랙리스트에 등록되었는지 확인 -> (로그아웃 한 경우)
             //    등록되어있다면 accessToken(key) / "logout"(value) 인지 확인.
             //    맞다면 accessToken이 blacklist에 등록되어 있는 상태이고 만료된 토큰이므로 재 로그인 진행 안내.
-            token = accessCookie.getValue();
-            log.info("cookie 안의 accessToken : " + token);
+//            token = accessCookie.getValue();
+//            log.info("cookie 안의 accessToken : " + token);
 
             String blackList = redisDAO.getBlackList(token);
             log.info("blackList : " + blackList);
@@ -118,6 +118,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void setAuthentication(String memberId) {
+        log.info("setAuthentication 수행");
+        log.info("setAuthentication memberId = " + memberId);
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         Authentication authentication = jwtProvider.createMemberAuthentication(memberId);
         context.setAuthentication(authentication);

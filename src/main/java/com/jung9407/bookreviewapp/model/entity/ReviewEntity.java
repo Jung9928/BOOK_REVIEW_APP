@@ -22,7 +22,7 @@ public class ReviewEntity {
     @Column(name = "book_id", length = 100)
     private int bookId;
 
-    @Column
+    @Column(length = 1000)
     private String review_title;
 
     @Column(length = 10)
@@ -34,13 +34,13 @@ public class ReviewEntity {
     @Column(name = "review_date")
     private Timestamp reviewDate;
 
-    @Column(name = "review_content")
+    @Column(name = "review_content", columnDefinition = "TEXT")
     private String reviewContent;
 
     @Column(name = "modified_at")
     private Timestamp modifiedAt;
 
-    @Column(name = "review_site")
+    @Column(name = "review_site", length = 30)
     private String reviewSite;
 
     @PreUpdate

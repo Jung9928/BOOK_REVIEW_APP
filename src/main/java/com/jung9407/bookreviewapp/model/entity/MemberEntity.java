@@ -32,7 +32,7 @@ public class MemberEntity {
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private MemberRole memberRole = MemberRole.USER;
+    private MemberRole memberRole = MemberRole.ROLE_USER;
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;
@@ -67,7 +67,7 @@ public class MemberEntity {
         memberEntity.setMemberId(memberId);
         memberEntity.setPassword(password);
         memberEntity.setEmail(email);
-        memberEntity.setMemberRole(memberRole);
+        memberEntity.setMemberRole(memberRole.ROLE_USER);
 
         return memberEntity;
     }

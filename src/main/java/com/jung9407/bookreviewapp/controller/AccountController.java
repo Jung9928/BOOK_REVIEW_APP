@@ -93,11 +93,14 @@ public class AccountController {
 
     // 로그아웃
     @DeleteMapping("/logout")
-    public ResponseEntity logout(@AuthenticationPrincipal CustomMemberDetails customMemberDetails, HttpServletRequest request) {
-
+    public ResponseEntity logout(HttpServletRequest request, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
         String accessToken = jwtProvider.getTokenFromHeader(request);
+//        String memberId = (String)jwtProvider.getMemberInfoFromToken(accessToken).get("sub");     // 방법 1
+        String memberId = customMemberDetails.getUsername();                                        // 방법 2
+
         log.info("access token : " + accessToken);
-        return memberService.logout(accessToken, customMemberDetails.getUsername());        // getUsername() : memberId
+        log.info("memberId : " + memberId);
+        return memberService.logout(accessToken, memberId);        // getUsername() : memberId
     }
 
     @GetMapping("/check")

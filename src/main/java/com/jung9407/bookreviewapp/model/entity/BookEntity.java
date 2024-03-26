@@ -34,19 +34,19 @@ public class BookEntity {
     @Column(length = 20)
     private String rating;
 
-    @Column
+    @Column(length = 100)
     private String regular_price;
 
-    @Column
+    @Column(length = 100)
     private String selling_price;
 
-    @Column(name = "main_ctg_num")
+    @Column(name = "main_ctg_num", length = 100)
     private String main_category;
 
-    @Column(name = "sub_ctg_num")
+    @Column(name = "sub_ctg_num", length = 100)
     private String sub_category;
 
-    @Column(name = "img_path")
+    @Column(name = "img_path", length = 1000)
     private String imgPath;
 
     @Column(name = "modified_at")

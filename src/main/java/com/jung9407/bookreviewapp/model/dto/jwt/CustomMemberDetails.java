@@ -26,7 +26,7 @@ public class CustomMemberDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         MemberRole memberRole = memberEntity.getMemberRole();
-        String authority = memberRole.USER.toString();
+        String authority = memberRole.ROLE_USER.toString();
         SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority);
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 

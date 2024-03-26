@@ -35,7 +35,10 @@
                     <input type="text" class="form-control" id="verificationCode" placeholder="인증코드를 입력하세요" v-model="verificationCode">
 
                     <!-- 타이머 표시 -->
-                    <div class="input-group-append">
+<!--                    <div class="input-group-append">-->
+<!--                      <span class="input-group-text">{{ timerFormatted }}</span>-->
+<!--                    </div>-->
+                    <div v-if="showTimer" class="input-group-append">
                       <span class="input-group-text">{{ timerFormatted }}</span>
                     </div>
 
@@ -77,7 +80,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import axios from "axios";
 import router from "@/scripts/router";
 // import store from "@/scripts/store";
@@ -104,6 +107,7 @@ export default {
     const isSendVerificationEmail = ref(false);
     const isSendVerificationCode = ref(false);
     const verificationCode = ref(""); // 추가: 인증번호 입력란의 모델
+    const showTimer = ref(false);
 
     // 타이머 관련 변수
     const timerMinutes = ref(3);
@@ -113,12 +117,23 @@ export default {
     // 타이머를 표시하기 위한 포맷팅
     const timerFormatted = ref('00:00');
 
+
     // 타이머 시작 함수
     const startTimer = () => {
+      showTimer.value = true;
       timerInterval.value = setInterval(() => {
         if (timerMinutes.value === 0 && timerSeconds.value === 0) {
           clearInterval(timerInterval.value);
-          // 타이머 종료에 따른 추가 작업을 여기에 추가할 수 있습니다.
+
+          // 타이머 종료에 따른 추가 작업
+          window.alert("인증 유효 시간이 만료되었습니다. 다시 이메일 인증을 진행해 주세요");
+          verificationCode.value = '';
+          showTimer.value = false;
+
+          // 유효시간 초기화
+          timerMinutes.value = 3;
+          timerSeconds.value = 0;
+          timerFormatted.value = '03:00'; // 초기값으로 다시 설정
         } else {
           updateTimer();
         }
@@ -139,9 +154,9 @@ export default {
     };
 
     // 인증코드 전송시 타이머 시작
-    onMounted(() => {
-      startTimer();
-    });
+    // onMounted(() => {
+    //   startTimer();
+    // });
 
     // 컴포넌트 제거 시 타이머 정리
     onUnmounted(() => {
@@ -247,6 +262,9 @@ export default {
               // HTTP 상태 코드가 성공(200)이면 인증메일 전송 성공
               window.alert("인증메일을 전송하였습니다");
               isSendVerificationEmail.value = true; // 추가: 인증 메일 전송 성공 시 플래그 설정
+
+              // 유효시간 렌더링 재시작
+              startTimer();
             } else {
               // 다른 상태 코드에 대한 처리
               window.alert("인증메일 전송에 오류가 발생했습니다. 다시 전송해주세요");
@@ -299,7 +317,7 @@ export default {
               window.alert("이메일 형식이 잘못되었습니다");
             } else {
               // 다른 상태 코드에 대한 처리
-              window.alert("인증메일 전송에 오류가 발생했습니다. 다시 전송해주세요");
+              window.alert("인증메일 전송에 오류가 발생했습니다. 다시 이메일 인증을 진행해주세요");
             }
           });
     }
@@ -353,9 +371,6 @@ export default {
     };
 
 
-
-
-
     // Return
     return {
       memberId,
@@ -381,6 +396,7 @@ export default {
       verificationCode,
       sendVerificationEmail,
       sendVerificationCode,
+      showTimer,
 
       timerFormatted,
       signup
