@@ -1,18 +1,28 @@
 <template>
-  <div class="accordion" id="accordionPanelsStayOpenExample">
-    <div v-for="(review, index) in reviewList" :key="index" class="accordion-item">
-      <h2 class="accordion-header" :id="'panelsStayOpen-heading' + index">
-        <button class="accordion-button" type="button" :data-bs-toggle="'#collapse' + index" :data-bs-target="'#panelsStayOpen-collapse' + index" :aria-expanded="index === 0 ? 'true' : 'false'" :aria-controls="'panelsStayOpen-collapse' + index">
-          {{ review.review_title }}
-          <span class="stars">{{ calculateStars(review.review_rating) }}</span>
-          <span style="font-size: 13px">({{review.review_rating}})</span>
-        </button>
-      </h2>
-      <div :id="'panelsStayOpen-collapse' + index" class="accordion-collapse collapse" :class="{ 'show': index === 0 }" :aria-labelledby="'panelsStayOpen-heading' + index" data-bs-parent="#panelsStayOpen-accordionExample">
-        <div class="accordion-body">
-          {{ review.review_content }}
-
-          <p><br>[작성자 : {{review.reviewer}}] <br>[작성일자 : {{formatDate(review.review_date)}}] <br> [출처 : {{review.review_site}}] </p>
+  <div>
+    <div v-for="(review, index) in reviewList" :key="index">
+      <!-- 각 아코디언 아이템의 부모 요소 -->
+      <div class="accordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header" :id="'heading' + index">
+            <button class="accordion-button" type="button" @click="toggleAccordion(index)">
+              {{ review.review_title }}
+              <span class="stars">{{ calculateStars(review.review_rating) }}</span>
+              <span style="font-size: 13px">({{review.review_rating}})</span>
+            </button>
+          </h2>
+          <div v-if="isActiveAccordion(index)" class="accordion-collapse collapse show" :id="'collapse' + index" :aria-labelledby="'heading' + index">
+            <div class="accordion-body">
+              {{ review.review_content }}
+              <p><br>[작성자 : {{review.reviewer}}] <br>[작성일자 : {{formatDate(review.review_date)}}] <br> [출처 : {{review.review_site}}] </p>
+            </div>
+          </div>
+          <div v-else class="accordion-collapse collapse" :id="'collapse' + index" :aria-labelledby="'heading' + index">
+            <div class="accordion-body">
+              {{ review.review_content }}
+              <p><br>[작성자 : {{review.reviewer}}] <br>[작성일자 : {{formatDate(review.review_date)}}] <br> [출처 : {{review.review_site}}] </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -26,6 +36,12 @@ export default {
   props: {
     book: Object,
     reviewList: Array
+  },
+
+  data() {
+    return {
+      activeAccordionIndices: [] // 여러 아코디언 요소의 펼쳐진 상태를 관리하는 배열
+    };
   },
 
   methods: {
@@ -44,6 +60,22 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
+    },
+
+    toggleAccordion(index) {
+      const currentIndex = this.activeAccordionIndices.indexOf(index);
+      if (currentIndex === -1) {
+        // 현재 아코디언 요소가 열려있지 않은 경우
+        this.activeAccordionIndices.push(index); // 해당 아코디언 요소의 인덱스를 추가하여 열린 상태로 변경
+      } else {
+        // 현재 아코디언 요소가 이미 열려있는 경우
+        this.activeAccordionIndices.splice(currentIndex, 1); // 해당 아코디언 요소의 인덱스를 배열에서 제거하여 닫힌 상태로 변경
+      }
+    },
+
+    isActiveAccordion(index) {
+      // 현재 아코디언 요소가 열려있는지 여부를 반환
+      return this.activeAccordionIndices.includes(index);
     }
   }
 }

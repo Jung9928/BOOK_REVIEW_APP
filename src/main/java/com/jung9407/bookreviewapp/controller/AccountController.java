@@ -93,22 +93,27 @@ public class AccountController {
 
     // 로그아웃
     @DeleteMapping("/logout")
-    public ResponseEntity logout(HttpServletRequest request, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+    public ResponseEntity logout(HttpServletRequest request,
+                                 HttpServletResponse response,
+                                 @AuthenticationPrincipal CustomMemberDetails customMemberDetails
+    ) {
         String accessToken = jwtProvider.getTokenFromHeader(request);
 //        String memberId = (String)jwtProvider.getMemberInfoFromToken(accessToken).get("sub");     // 방법 1
         String memberId = customMemberDetails.getUsername();                                        // 방법 2
 
         log.info("access token : " + accessToken);
         log.info("memberId : " + memberId);
-        return memberService.logout(accessToken, memberId);        // getUsername() : memberId
+        return memberService.logout(accessToken, response, memberId);        // getUsername() : memberId
     }
 
     @GetMapping("/check")
-    public ResponseEntity check(@CookieValue(value = "token", required = false) String token) {
+    public ResponseEntity check(@CookieValue(value = "Refresh", required = false) String token) {
         Claims claims = jwtProvider.getMemberInfoFromToken(token);
 
+        // 1. claims에서 access token의 exp(만료시간) 가져오기
+
         if(claims != null) {
-            long id = Integer.parseInt(claims.get("id").toString());
+            long id = Integer.parseInt(claims.get("memberId").toString());
             return new ResponseEntity<>(id, HttpStatus.OK);
         }
 
@@ -131,16 +136,28 @@ public class AccountController {
      * -> 만료된 토큰인지 검증하고 만료 시, 만료된 토큰임을 에러메세지 출력
      * -> 클라이언트에서 에러메세지 확인 후, 이 api(atk 재발급) 요청 진행
      *
-     * @param customMemberDetails
+     * @param customMemberDetails, Cookie value(refreshToken)
      * @param : tokenRequest  refreshToken
-     * @return AccessToken + RefreshToken
+     * @return AccessToken
      * */
-    @PostMapping("/reissue-token")
-    public TokenResponseDTO reissueToken(@AuthenticationPrincipal CustomMemberDetails customMemberDetails, @RequestBody ReissueTokenRequest reissueTokenRequest) {
+//    @PostMapping("/reissue-token")
+//    public TokenResponseDTO reissueToken(
+//            @AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+//            @CookieValue(name = "Refresh", required = false) ReissueTokenRequest reissueTokenRequest
+//    ) {
+//        // member 객체 정보를 이용하여 토큰 발행
+//        MemberDTO memberDTO = MemberDTO.entityToMemberDTO(customMemberDetails.getMemberEntity());
+//        return jwtProvider.reissueAtk(memberDTO.getMemberId(), memberDTO.getMemberRole(), reissueTokenRequest.getRefreshToken());
+//    }
 
+    @PostMapping("/reissue-token")
+    public ResponseResultCode<TokenResponseDTO> reissueToken(
+            @AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+            @CookieValue(name = "Refresh", required = false) ReissueTokenRequest reissueTokenRequest
+    ) {
         // member 객체 정보를 이용하여 토큰 발행
         MemberDTO memberDTO = MemberDTO.entityToMemberDTO(customMemberDetails.getMemberEntity());
-        return jwtProvider.reissueAtk(memberDTO.getMemberId(), memberDTO.getMemberRole(), reissueTokenRequest.getRefreshToken());
+        return ResponseResultCode.success(jwtProvider.reissueAtk(memberDTO.getMemberId(), memberDTO.getMemberRole(), reissueTokenRequest.getRefreshToken()));
     }
 
 

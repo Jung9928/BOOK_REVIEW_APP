@@ -139,12 +139,18 @@ public class MemberService {
 
     // 로그아웃
     @Transactional
-    public ResponseEntity logout(String accessToken, String memberId) {
-        // Redis에 accessToken을 사용못하도록 등록
+    public ResponseEntity logout(String accessToken, HttpServletResponse response, String memberId) {
+        // Redis에 accessToken을 사용못하도록 blacklist 등록
+        log.info("============ logout 시작 ==========");
+        log.info("전달받은 accessToken : " + accessToken);
+        log.info("전달받은 memberId : " + memberId);
         Long expiration = jwtProvider.getExpirationTime(accessToken);
         redisDAO.setBlackList(accessToken, "logout", expiration);
 
         if(redisDAO.hasKey(memberId)) {
+            Cookie refreshToken = cookieUtils.deleteCookie("Refresh");
+            response.addCookie(refreshToken);
+
             redisDAO.deleteRefreshToken(memberId);
         }
         else {

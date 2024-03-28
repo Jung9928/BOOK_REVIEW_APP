@@ -26,8 +26,22 @@
           <router-link to="/login" class="nav-link link-dark px-2">로그인</router-link>
         </li>
 
-        <li class="nav-item" @click="logout()" v-else>
-          <a to="/login" class="nav-link link-dark px-2">로그아웃</a>
+        <li class="nav-item" v-else>
+          <div class="dropdown">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+              <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+              <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+            </svg>
+            <button class="btn btn-secondary dropdown-toggle border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: black">
+              {{ $store.state.memberId }}님
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">회원정보 보기</a></li>
+              <li><a class="dropdown-item" href="#">작성게시글 보기</a></li>
+              <li><a class="dropdown-item" href="#">작성댓글 확인</a></li>
+              <li @click="logout()" ><a to="/login" class="dropdown-item" href="#">로그아웃</a></li>
+            </ul>
+          </div>
         </li>
 
         <li class="nav-item"><a href="/signup" class="nav-link link-dark px-2">회원가입</a></li>
@@ -38,9 +52,10 @@
 
 <script>
 import router from "@/scripts/router";
-import axios from "axios";
+//import axios from "axios";
 import { computed } from "vue";
 import { useStore } from 'vuex';
+import axiosInterceptors from "@/common/interceptors";
 
 export default {
   name: 'Header',
@@ -52,7 +67,7 @@ export default {
     const logout = ()=> {
       const {accessToken, memberId} = store.state;
 
-      axios.delete("/api/v1/members/logout", {
+      axiosInterceptors.delete("/api/v1/members/logout", {
         headers: {
           Authorization: 'Bearer ' + `${accessToken}`
         },

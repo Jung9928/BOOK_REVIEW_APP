@@ -2,6 +2,7 @@ package com.jung9407.bookreviewapp.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -45,5 +46,18 @@ public class CookieUtils {
         }
 
         return null;
+    }
+
+    public Cookie deleteCookie(String cookieName) {
+        Cookie cookie = new Cookie(cookieName, null);
+
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
+        cookie.setMaxAge(0);
+
+        cookie.setPath("/");
+
+        return cookie;
     }
 }

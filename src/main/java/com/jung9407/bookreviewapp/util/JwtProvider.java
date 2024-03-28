@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.Token;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -68,9 +69,9 @@ public class JwtProvider {
      * @param : token
      * @return
      * */
-    public Claims getMemberInfoFromToken(String atk) {
+    public Claims getMemberInfoFromToken(String token) {
 
-        return Jwts.parserBuilder().setSigningKey(getKey(secretKey)).build().parseClaimsJws(atk).getBody();
+        return Jwts.parserBuilder().setSigningKey(getKey(secretKey)).build().parseClaimsJws(token).getBody();
     }
 
     /**
@@ -119,22 +120,24 @@ public class JwtProvider {
         return new TokenResponseDTO(accessToken, refreshToken, memberId);
     }
 
-    // 필터 단계에서 검증된 RTK에서 꺼낸 memberId가 Redis에 존재하는지 확인 후, ATK, RTK 재발급 진행
+    // JWT 필터의 RTK 검증단계에서 Cookie의 refreshToken 값과 Redis에 존재하는 refresh token 값이 같은지 확인 후, ATK 재발급 진행
     public TokenResponseDTO reissueAtk(String memberId, MemberRole memberRole, String reToken) {
         // 레디스에 저장된 리프레쉬 토큰 값을 가져와서 입력된 refreshToken과 같은 지 확인
         if(!redisDAO.getRefreshToken(memberId).equals(reToken)) {
-            throw new ApplicationException(ErrorCode.INTERNAL_SERVER_ERROR, String.format("토큰에 문제가 있습니다."));
+            throw new ApplicationException(ErrorCode.INTERNAL_SERVER_ERROR,
+                    String.format("Cookie에서 가져온 Refresh토큰값과 Redis의 refrestoken값이 일치하지 않습니다.")
+            );
         }
 
         String accessToken = generateToken(memberId, memberRole, secretKey, atkLive);
-        String refreshToken = generateToken(memberId, memberRole, secretKey, rtkLive);
-        redisDAO.setRefreshToken(memberId, refreshToken, rtkLive);
+//        String refreshToken = generateToken(memberId, memberRole, secretKey, rtkLive);
+//        redisDAO.setRefreshToken(memberId, refreshToken, rtkLive);
 
-        return new TokenResponseDTO(accessToken, refreshToken, memberId);
+        return new TokenResponseDTO(accessToken, reToken, memberId);
     }
 
     /**
-     * Cookie에서 가져온 토큰 검증 메소드
+     * 토큰 검증 메소드
      * @param : token
      * @return
      * */

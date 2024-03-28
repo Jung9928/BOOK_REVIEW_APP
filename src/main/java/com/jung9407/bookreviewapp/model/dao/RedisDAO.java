@@ -1,6 +1,8 @@
 package com.jung9407.bookreviewapp.model.dao;
 
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -12,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class RedisDAO {
 
     private final RedisTemplate<String, String> redisTemplate;
@@ -36,6 +39,7 @@ public class RedisDAO {
      * @return 해당 리프레쉬 토큰
      * */
     public String getRefreshToken(String key) {
+        log.info("redisTemplate.opsForValue().get(key) : " + redisTemplate.opsForValue().get(key));
         return redisTemplate.opsForValue().get(key);
     }
 

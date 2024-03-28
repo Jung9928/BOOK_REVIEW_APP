@@ -56,19 +56,18 @@ export default {
       })
           .then((res) => {
             // 성공했을 경우
-            const memberData = {
-              memberId: state.form.memberId,
-              accessToken: res.headers.get("Authorization"),
-            }
+            const accessToken = res.headers.get("Authorization");
+            const memberId = state.form.memberId;
 
-            console.log("accessToken : " + memberData.accessToken);
+            console.log("accessToken : " + accessToken);
+            console.log("memberId : " + memberId);
 
             // 토큰 유효 시간 확인을 위한 토큰 디코딩
-            const accessTokenExpiration = decodeJWT(memberData.accessToken);
-            console.log("토큰 유효 시간 : ", new Date(accessTokenExpiration.exp * 1000));
+            const accessTokenExpiration = new Date(decodeJWT(accessToken).exp * 1000);
+            console.log("토큰 유효 시간 : ", accessTokenExpiration);
 
             // 로그인 액션 호출하여 로그인 상태 변경
-            store.dispatch('login', memberData);
+            store.dispatch('login', { accessToken, memberId });
 
             router.push({path:"/"});
             window.alert("로그인하셨습니다.");
@@ -78,7 +77,7 @@ export default {
           })
           .catch((res) => {
             // 실패했을 경우
-            console.error("Error message : " + res);
+            console.error("Error message : " + res.message);
             window.alert("회원이 아닙니다. 회원가입 후, 로그인 바랍니다.");
           })
     };
