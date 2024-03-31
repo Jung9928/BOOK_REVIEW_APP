@@ -153,11 +153,12 @@ public class AccountController {
     @PostMapping("/reissue-token")
     public ResponseResultCode<TokenResponseDTO> reissueToken(
             @AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-            @CookieValue(name = "Refresh", required = false) ReissueTokenRequest reissueTokenRequest
+            @CookieValue(name = "Refresh", required = false) ReissueTokenRequest reissueTokenRequest,
+            HttpServletResponse response
     ) {
         // member 객체 정보를 이용하여 토큰 발행
         MemberDTO memberDTO = MemberDTO.entityToMemberDTO(customMemberDetails.getMemberEntity());
-        return ResponseResultCode.success(jwtProvider.reissueAtk(memberDTO.getMemberId(), memberDTO.getMemberRole(), reissueTokenRequest.getRefreshToken()));
+        return ResponseResultCode.success(jwtProvider.reissueAtk(memberDTO.getMemberId(), memberDTO.getMemberRole(), reissueTokenRequest.getRefreshToken(), response));
     }
 
 

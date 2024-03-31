@@ -81,6 +81,7 @@ public class SecurityConfig {
                                 "/api/v1/verifyEmail/**",
                                 "/api/v1/members/verifyId/**",
                                 "/api/v1/book/**",
+                                "/api/v1/posts/**",
                                 "/"
                                 ).permitAll()
                         .anyRequest().authenticated());

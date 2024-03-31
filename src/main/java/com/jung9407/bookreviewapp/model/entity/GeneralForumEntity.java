@@ -1,9 +1,6 @@
 package com.jung9407.bookreviewapp.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jung9407.bookreviewapp.util.MemberRole;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,8 +14,8 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Entity
-@Table(name = "post")
-public class PostEntity {
+@Table(name = "general_forum")
+public class GeneralForumEntity {
 
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +33,7 @@ public class PostEntity {
    @Column(name = "content", columnDefinition = "TEXT")
    private String content;
 
-   @Column(name = "registed_at")
+   @Column(name = "registered_at")
    private Timestamp registeredAt;
 
    @Column(name = "modified_at")
@@ -52,8 +49,8 @@ public class PostEntity {
       this.modifiedAt = Timestamp.from(Instant.now());
    }
 
-   public static PostEntity getPostEntity(String title, String content, MemberEntity memberEntity) {
-      PostEntity entity = new PostEntity();
+   public static GeneralForumEntity getPostEntity(String title, String content, MemberEntity memberEntity) {
+      GeneralForumEntity entity = new GeneralForumEntity();
       entity.setTitle(title);
       entity.setContent(content);
       entity.setMember(memberEntity);

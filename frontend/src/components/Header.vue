@@ -15,11 +15,11 @@
   <nav class="py-2 bg-light border-bottom">
     <div class="container d-flex flex-wrap">
       <ul class="nav me-auto">
-        <li class="nav-item"><a href="/" class="nav-link link-dark px-2 active" aria-current="page">공지</a></li>
-        <li class="nav-item"><a href="/" class="nav-link link-dark px-2">자유게시판</a></li>
-        <li class="nav-item"><a href="/" class="nav-link link-dark px-2">도서 추천게시판</a></li>
-        <li class="nav-item"><a href="/" class="nav-link link-dark px-2">FAQ</a></li>
-        <li class="nav-item"><a href="/" class="nav-link link-dark px-2">삭제/문의</a></li>
+        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2 active" aria-current="page">공지</router-link></li>
+        <li class="nav-item"><router-link to="/generalForum" class="nav-link link-dark px-2">자유게시판</router-link></li>
+        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">도서 추천게시판</router-link></li>
+        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">FAQ</router-link></li>
+        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">삭제/문의</router-link></li>
       </ul>
       <ul class="nav">
         <li class="nav-item" v-if="$store.state.isLoggedIn === false">
@@ -39,12 +39,12 @@
               <li><a class="dropdown-item" href="#">회원정보 보기</a></li>
               <li><a class="dropdown-item" href="#">작성게시글 보기</a></li>
               <li><a class="dropdown-item" href="#">작성댓글 확인</a></li>
-              <li @click="logout()" ><a to="/login" class="dropdown-item" href="#">로그아웃</a></li>
+              <li @click="logout()" ><router-link to="/login" class="dropdown-item">로그아웃</router-link></li>
             </ul>
           </div>
         </li>
 
-        <li class="nav-item"><a href="/signup" class="nav-link link-dark px-2">회원가입</a></li>
+        <li class="nav-item"><router-link to="/signup" class="nav-link link-dark px-2">회원가입</router-link></li>
       </ul>
     </div>
   </nav>

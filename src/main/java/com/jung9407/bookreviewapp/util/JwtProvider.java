@@ -121,7 +121,7 @@ public class JwtProvider {
     }
 
     // JWT 필터의 RTK 검증단계에서 Cookie의 refreshToken 값과 Redis에 존재하는 refresh token 값이 같은지 확인 후, ATK 재발급 진행
-    public TokenResponseDTO reissueAtk(String memberId, MemberRole memberRole, String reToken) {
+    public TokenResponseDTO reissueAtk(String memberId, MemberRole memberRole, String reToken, HttpServletResponse response) {
         // 레디스에 저장된 리프레쉬 토큰 값을 가져와서 입력된 refreshToken과 같은 지 확인
         if(!redisDAO.getRefreshToken(memberId).equals(reToken)) {
             throw new ApplicationException(ErrorCode.INTERNAL_SERVER_ERROR,
@@ -132,6 +132,9 @@ public class JwtProvider {
         String accessToken = generateToken(memberId, memberRole, secretKey, atkLive);
 //        String refreshToken = generateToken(memberId, memberRole, secretKey, rtkLive);
 //        redisDAO.setRefreshToken(memberId, refreshToken, rtkLive);
+        log.info("reissueAtk 메소드 내에서 재발급한 accessToken : " + accessToken);
+
+        response.addHeader("Authorization", accessToken);
 
         return new TokenResponseDTO(accessToken, reToken, memberId);
     }

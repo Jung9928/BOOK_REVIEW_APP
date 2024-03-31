@@ -18,8 +18,9 @@ jwt:
     token.expired-time-ms: 2592000000
 
     live:
-      atk: 1800000      # 30분
-      rtk: 604800    # 7일
+#      atk: 1800000      # 30분
+      atk: 300000        # 5분
+      rtk: 604800000     # 7일
 
 
 spring.redis:

@@ -95,7 +95,7 @@ export default {
           })
           .catch((err) => {
             if (err.message.indexOf('Network Error') > -1) {
-              alert('네트워크가 원활하지 않습니다.\n 잠시 후, 다시 시도해주세요.')
+              alert('네트워크가 원활하지 않습니다.\n 잠시 후, 다시 시도해주세요.');
             }
           });
     };

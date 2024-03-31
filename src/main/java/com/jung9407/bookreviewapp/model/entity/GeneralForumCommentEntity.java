@@ -1,11 +1,13 @@
 package com.jung9407.bookreviewapp.model.entity;
 
+import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
 
-public class PostCommentEntity {
+public class GeneralForumCommentEntity {
 
     private Long postId;
-    private PostEntity postEntity;
+    private GeneralForumEntity generalForumEntity;
     private String comment;
     private LocalDateTime createdAt;
     private String createdBy;

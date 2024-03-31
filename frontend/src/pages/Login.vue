@@ -75,10 +75,24 @@ export default {
             // saveAuthToCookie(accessToken);
             // saveUserToCookie(refreshToken);
           })
-          .catch((res) => {
+          .catch((error) => {
             // 실패했을 경우
-            console.error("Error message : " + res.message);
-            window.alert("회원이 아닙니다. 회원가입 후, 로그인 바랍니다.");
+            console.log("error.response.status : " + error.response.status);
+            if(error.response.status === 500) {
+              console.error("Error message : " + error.message);
+              window.alert("서버에 문제가 있습니다.");
+              return;
+            }
+            else if(error.response.status == 401) {
+              console.error("Error message : " + error.message);
+              window.alert("회원이 아닙니다. 회원가입 후, 로그인 바랍니다.");
+              return;
+            }
+            else {
+              console.error("Error message : " + error.message);
+              window.alert("알 수 없는 에러가 발생했습니다. 잠시 후에 다시 시도해주세요");
+              return;
+            }
           })
     };
     return {state, submit}

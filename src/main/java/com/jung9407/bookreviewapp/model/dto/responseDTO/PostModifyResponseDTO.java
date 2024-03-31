@@ -1,8 +1,7 @@
 package com.jung9407.bookreviewapp.model.dto.responseDTO;
 
 import com.jung9407.bookreviewapp.model.dto.MemberDTO;
-import com.jung9407.bookreviewapp.model.entity.MemberEntity;
-import com.jung9407.bookreviewapp.model.entity.PostEntity;
+import com.jung9407.bookreviewapp.model.entity.GeneralForumEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -24,14 +23,14 @@ public class PostModifyResponseDTO {
 
     private Timestamp modifiedAt;
 
-    public static PostModifyResponseDTO getPostModifyResponseDTO(PostEntity postEntity) {
+    public static PostModifyResponseDTO getPostModifyResponseDTO(GeneralForumEntity generalForumEntity) {
         return new PostModifyResponseDTO(
-                postEntity.getPostId(),
-                MemberDTO.entityToMemberDTO(postEntity.getMember()),
-                postEntity.getTitle(),
-                postEntity.getContent(),
-                postEntity.getRegisteredAt(),
-                postEntity.getModifiedAt()
+                generalForumEntity.getPostId(),
+                MemberDTO.entityToMemberDTO(generalForumEntity.getMember()),
+                generalForumEntity.getTitle(),
+                generalForumEntity.getContent(),
+                generalForumEntity.getRegisteredAt(),
+                generalForumEntity.getModifiedAt()
         );
     }
 }

@@ -26,8 +26,10 @@ axiosInterceptors.interceptors.response.use(
                 const response = await axios.post("/api/v1/members/reissue-token");
 
                 // refresh token이 아직 유효한 경우, 새로 발급받은 access token과 memberId를 사용하여 로그인 처리
-                const newAccessToken = response.data.accessToken;
+                const newAccessToken = response.headers.get("Authorization");
+                console.log("newAccessToken : " + newAccessToken);
                 const memberId = response.data.memberId;
+                console.log("memberId : " + memberId);
                 await store.dispatch('login', {accessToken: newAccessToken, memberId});
 
                 // 재요청을 위한 original request의 header에 새로 발급받은 access token 설정

@@ -55,15 +55,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.info("========= doFilterInternal 실행 시작 =========");
 
+        // 1. Header에서 accessToken 가져오기
         String token = jwtProvider.getTokenFromHeader(request);
         log.info("token : " + token);
 
-        // 1. Header에서 accessToken 가져오기
-//        Cookie accessCookie = cookieUtils.getCookie(request, "Authorization");
-//        log.info("accessCookie : " + accessCookie);
-
         // 2. accessToken 값이 존재하면
-//        String token = "";
         if(token != null) {
 
             // 3. accessToken이 블랙리스트에 등록되었는지 확인 -> (로그아웃 한 경우)
@@ -112,7 +108,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 9. Redis에서 해당 유저의 id(key)로 refresh token(value) 값 가져옴
 //            log.info("request.getParameter : " + request.getParameter("memberId"));
-            String memberId = (String)jwtProvider.getMemberInfoFromToken(refreshTokenFromCookie).get("sub");
+            Claims claimBody = jwtProvider.getMemberInfoFromToken(refreshTokenFromCookie);
+            log.info("claimBody : " + claimBody);
+//            String memberId = (String)jwtProvider.getMemberInfoFromToken(refreshTokenFromCookie).get("sub");
+            String memberId = (String)claimBody.get("sub");
+            log.info("memberId : " + memberId);
             String refreshTokenFromRedis = redisDAO.getRefreshToken(memberId);
             log.info("refreshToken from redis : " + refreshTokenFromRedis);
 
@@ -126,7 +126,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             // 11. refreshToken 검증에 문제가 없다면 인증 객체를 생성하여 securityContextHolder에서 관리
-            Claims memberInfo = jwtProvider.getMemberInfoFromToken(token);
+            Claims memberInfo = jwtProvider.getMemberInfoFromToken(refreshTokenFromRedis);
             log.info("memberInfo.getSubject() : " + memberInfo.getSubject());
             setAuthentication(memberInfo.getSubject());         // subject = memberId
         }
