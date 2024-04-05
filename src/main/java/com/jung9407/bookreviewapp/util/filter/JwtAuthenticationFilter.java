@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 메인 페이지 (도서 검색 페이지) url은 jwt 검증 필터 작업 제외
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String[] excludePath = {"/api/v1/book", "/api/v1/login"};
+        String[] excludePath = {"/api/v1/book", "/api/v1/login", "/api/v1/posts/**", "/api/v1/members/**"};
 
         // 제외할 url 설정
         String path = request.getRequestURI();

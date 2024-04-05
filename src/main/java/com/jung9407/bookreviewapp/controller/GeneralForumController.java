@@ -35,7 +35,7 @@ public class GeneralForumController {
     private PostValidator postValidator;
 
     // 게시글 작성
-    @PostMapping
+    @PostMapping("/postCreate")
     public ResponseResultCode<Void> create(@RequestBody PostCreateDTO postCreateDTO, Authentication authentication) {
         generalForumService.create(postCreateDTO.getTitle(), postCreateDTO.getContent(), authentication.getName());
         return ResponseResultCode.success();
@@ -43,19 +43,21 @@ public class GeneralForumController {
 
 
     // 게시글 수정
-    @PutMapping("/{postId}")
+    @PutMapping("/generalForum/{postId}")
     public ResponseResultCode<PostModifyResponseDTO> modify(@PathVariable Long postId, @RequestBody PostModifyRequestDTO postModifyRequestDTO, Authentication authentication) {
         PostModifyResponseDTO postModifyResponseDTO = generalForumService.modify(postModifyRequestDTO.getTitle(), postModifyRequestDTO.getContent(), authentication.getName(), postId);
         System.out.println("========================================");
         System.out.println("postId : " + postModifyResponseDTO.getPostId());
         System.out.println("title : " + postModifyResponseDTO.getTitle());
-        System.out.println("content : " + postModifyResponseDTO.getContent());
+        System.out.println("content : " + postModifyResponseDTO.getContent().toString());
+        System.out.println("memberId : " + postModifyResponseDTO.getMember().getMemberId());
         System.out.println("========================================");
 
         return ResponseResultCode.success(postModifyResponseDTO);
     }
 
-    @DeleteMapping("/{postId}")
+    // 게시글 삭제
+    @DeleteMapping("/generalForum/{postId}")
     public ResponseResultCode<Void> delete(@PathVariable Long postId, Authentication authentication) {
         generalForumService.delete(authentication.getName(), postId);
         return ResponseResultCode.success();
@@ -69,6 +71,16 @@ public class GeneralForumController {
         log.info("searchValue : " + generalForumSearchConditionDTO.getSearchValue());
 
         return generalForumService.getForumBoardList(pageable, generalForumSearchConditionDTO);
+    }
+
+    // 게시글 단건 조회
+    @GetMapping("/generalForum/{postId}")
+    public ResponseResultCode<GeneralForumResponseDTO> getGeneralForumData(@PathVariable Long postId) {
+        log.info("postId : " + postId);
+
+        GeneralForumResponseDTO generalForumResponseDTO = generalForumService.getForumPostData(postId);
+
+        return ResponseResultCode.success(generalForumResponseDTO);
     }
 
     @GetMapping("/content")

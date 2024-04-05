@@ -34,10 +34,10 @@ public class MemberEntity {
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole = MemberRole.ROLE_USER;
 
-    @Column(name = "registered_at")
+    @Column(name = "reg_at")
     private Timestamp registeredAt;
 
-    @Column(name = "modified_at")
+    @Column(name = "mod_at")
     private Timestamp modifiedAt;
 
     @PrePersist

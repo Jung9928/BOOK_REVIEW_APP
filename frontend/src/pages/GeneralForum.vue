@@ -1,36 +1,72 @@
 <template>
-  <v-card
-      title="Nutrition"
-      flat
-  >
-    <template v-slot:text>
-      <v-text-field
-          v-model="search"
-          label="Search"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          hide-details
-          single-line
-      ></v-text-field>
-    </template>
+  <div class="search-container">
+    <!-- 검색 카테고리 선택 드롭다운 메뉴 -->
+    <select v-model="searchCategory" class="search-category">
+      <option value="title">제목</option>
+      <option value="memberId">작성자ID</option>
+      <option value="content">내용</option>
+      <option value="comment">댓글</option>
+    </select>
 
-    <v-data-table
-        :headers="headers"
-        :items="desserts"
-        :search="search"
-    ></v-data-table>
-  </v-card>
+    <!-- 검색어 입력란 -->
+    <input v-model="searchValue" type="text" placeholder="검색어를 입력하세요..." @keyup.enter="search" class="search-input">
+
+    <!-- 검색 버튼 -->
+    <button @click="search" type="button" class="btn btn-outline-dark" style="width: 70px; height: 46px">검색</button>
+  </div>
+
+  <!-- "글 작성하기" 버튼 -->
+  <button @click="navigateToWritePage" type="button" class="btn btn-outline-dark btn-write-post">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+      <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+      <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+    </svg>
+    글 작성하기
+  </button>
+
+  <!-- 게시글 목록 컴포넌트 삽입 -->
+<!--  <PostView :items="generalForumList" :fields="fields" @click="getContent"/>-->
+  <div>
+    <b-table class="post-table" :items="generalForumList" @row-clicked="getContent">
+
+    </b-table>
+
+  </div>
+
+  <!-- 페이지네이션 -->
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" :class="{ disabled: currentPage === 1 }">
+        <button class="page-link" @click="goFirstPage">&laquo;</button>
+      </li>
+      <li class="page-item" :class="{ disabled: currentPage === 1 }">
+        <button class="page-link" @click="prevPage">&lt;</button>
+      </li>
+      <li class="page-item" v-for="page in displayedPages" :key="page" :class="{ active: currentPage === page }">
+        <button class="page-link" @click="gotoPage(page)">{{ page }}</button>
+      </li>
+      <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+        <button class="page-link" @click="nextPage">&gt;</button>
+      </li>
+      <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+        <button class="page-link" @click="goLastPage">&raquo;</button>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 <script>
 import {ref, computed} from 'vue';
 import axios from "axios";
+import router from "@/scripts/router";
 
 export default {
+
   setup() {
     const generalForumList = ref([]);
     const currentPage = ref(1);
     const totalPages = ref(0);
+    const searchCategory = ref('title');
 
     const searchGeneralForums = (searchValue, searchCategory) => {
       fetchGeneralForums(searchValue, searchCategory);
@@ -47,7 +83,16 @@ export default {
       axios.get(`/api/v1/posts/generalForumList`, { params })
           .then((res) => {
             if(res.data.resultCode == "OK") {
-              generalForumList.value = res.data.data;
+
+              generalForumList.value = res.data.data.map(item => ({
+                번호 : item.post_id,
+                제목 : item.title,
+                글쓴이 : item.member_id,
+                날짜 : formatDate(item.registeredAt),
+                조회수 : item.vw_cnt,
+                추천수 : item.rcmnd_cnt,
+              }));
+              console.log("generalForumList : " );
               totalPages.value = res.data.generalForumPaginationDTO.totalPageCnt;
             }
           })
@@ -56,6 +101,15 @@ export default {
               alert('네트워크가 원활하지 않습니다. \n 잠시 후, 다시 시도해주세요.');
             }
           });
+    };
+
+    // YYYY.MM.DD 형식으로 날짜 변환하는 함수
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}.${month}.${day}`;
     };
 
     // 맨 첫페이지 이동
@@ -122,10 +176,37 @@ export default {
       return numPages;
     });
 
+    const navigateToWritePage = () => {
+      router.push({path:"/generalForumPost"});
+    }
+
+    // 게시글 목록을 클릭해서 게시글 상세내용 가져오기
+    const getContent = (item) => {
+
+      const postId = JSON.stringify(item['번호']);
+      console.log("postId : " + postId);
+
+      // 게시글 번호를 기반으로 해당 게시글의 내용을 가져오는 로직
+      axios.get(`/api/v1/posts/generalForum/${postId}`)
+          .then((res) => {
+            // 가져온 게시글 데이터 처리
+            // console.log("title : " + JSON.stringify(res.data.result.title));
+            const title = JSON.stringify(res.data.result.title);
+            // console.log("content : " + JSON.stringify(res.data.result.content));
+
+            const content = JSON.stringify(res.data.result.content);
+            router.push({path:"/generalForumPostDetail", query: {postId : postId, title: title, content: content}});
+          })
+          .catch((err) => {
+            console.error('게시글을 가져오는 중 오류 발생:', err);
+          });
+    }
+
     fetchGeneralForums(); // 페이지가 로드될 때 처음에도 데이터를 가져옴
 
     return {
       generalForumList,
+      searchCategory,
       currentPage,
       totalPages,
       goFirstPage,
@@ -133,13 +214,60 @@ export default {
       prevPage,
       nextPage,
       gotoPage,
+      navigateToWritePage,
+      displayedPages,
+
       searchGeneralForums,
-      displayedPages
+      getContent
     };
   },
 }
 </script>
 
 <style scoped>
+.search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
 
+.search-container select, .search-container input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.search-input {
+  width: calc(15%); /* 입력란 좌우 너비 조절 */
+}
+
+.search-container .search-btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.post-table {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.post-table tbody tr {
+  background-color: transparent !important;
+}
+
+.search-container .search-btn:hover {
+  background-color: #0056b3;
+}
+
+/* 글 작성하기 버튼을 우측으로 이동 */
+.btn-write-post {
+  margin-left: 68%; /* 현재 위치로부터 우측으로 이동 */
+  border: none;
+}
 </style>

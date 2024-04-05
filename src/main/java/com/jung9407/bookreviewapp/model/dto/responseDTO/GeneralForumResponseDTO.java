@@ -21,6 +21,10 @@ public class GeneralForumResponseDTO {
 
     private String content;
 
+    private int vw_cnt;
+
+    private int rcmnd_cnt;
+
     private Timestamp registeredAt;
 
     private Timestamp modifiedAt;

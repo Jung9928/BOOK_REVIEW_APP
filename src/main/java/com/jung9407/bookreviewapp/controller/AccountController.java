@@ -6,8 +6,10 @@ import com.jung9407.bookreviewapp.model.dto.jwt.CustomMemberDetails;
 import com.jung9407.bookreviewapp.model.dto.jwt.ReissueTokenRequest;
 import com.jung9407.bookreviewapp.model.dto.jwt.TokenResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberLoginRequestDTO;
+import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberModifyRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.MemberLoginResponseDTO;
+import com.jung9407.bookreviewapp.model.dto.responseDTO.MemberModifyResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.MemberSignupResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.ResponseResultCode;
 
@@ -120,6 +122,12 @@ public class AccountController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
+    @GetMapping("/email-info/{memberId}")
+    public ResponseResultCode<String> getEmailInfo(@PathVariable("memberId") String memberId) {
+        log.info("memberId : " + memberId);
+        return ResponseResultCode.success(memberService.getMemberByMemberEmail(memberId).getEmail());
+    }
+
     /**
      * 해당 유저의 정보 확인
      * @param customMemberDetails
@@ -161,6 +169,12 @@ public class AccountController {
         return ResponseResultCode.success(jwtProvider.reissueAtk(memberDTO.getMemberId(), memberDTO.getMemberRole(), reissueTokenRequest.getRefreshToken(), response));
     }
 
+    @PutMapping("/modify-info")
+    public ResponseResultCode<MemberModifyResponseDTO> modifyInfo(@RequestBody MemberModifyRequestDTO memberModifyRequestDTO) {
+        MemberDTO memberDTO = memberService.modifyInfo(memberModifyRequestDTO);
+
+        return ResponseResultCode.success(MemberModifyResponseDTO.getMemberField(memberDTO));
+    }
 
 //    // 회원탈퇴
 //    @DeleteMapping("/api/account/{id}")

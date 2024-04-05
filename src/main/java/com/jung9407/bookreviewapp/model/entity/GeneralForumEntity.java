@@ -30,13 +30,20 @@ public class GeneralForumEntity {
    @Column(name = "title", nullable = false)
    private String title;
 
-   @Column(name = "content", columnDefinition = "TEXT")
-   private String content;
+   @Lob
+   @Column(name = "content", columnDefinition = "BLOB")
+   private byte[] content;
 
-   @Column(name = "registered_at")
+   @Column(name = "vw_cnt")
+   private int viewCount;
+
+   @Column(name = "rcmnd_cnt")
+   private int recommendCount;
+
+   @Column(name = "reg_at")
    private Timestamp registeredAt;
 
-   @Column(name = "modified_at")
+   @Column(name = "mod_at")
    private Timestamp modifiedAt;
 
    @PrePersist
@@ -49,7 +56,7 @@ public class GeneralForumEntity {
       this.modifiedAt = Timestamp.from(Instant.now());
    }
 
-   public static GeneralForumEntity getPostEntity(String title, String content, MemberEntity memberEntity) {
+   public static GeneralForumEntity getPostEntity(String title, byte[] content, MemberEntity memberEntity) {
       GeneralForumEntity entity = new GeneralForumEntity();
       entity.setTitle(title);
       entity.setContent(content);

@@ -17,7 +17,7 @@ public class PostModifyResponseDTO {
 
     private String title;
 
-    private String content;
+    private byte[] content;
 
     private Timestamp registeredAt;
 

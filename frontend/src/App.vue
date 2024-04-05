@@ -5,13 +5,8 @@
 </template>
 
 <script>
-
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-// import store from "@/scripts/store";
-// import axios from "axios";
-// import {watch} from "vue";
-// import {useRoute} from "vue-router";
 
 export default {
   name: 'App',
@@ -30,7 +25,6 @@ export default {
     //
     // const route = useRoute();
     //
-    // // 경로가 변경되는지 감시
     // watch(route, () => {
     //   check();
     // })
@@ -46,7 +40,6 @@ export default {
   -moz-user-select: none;
   user-select: none;
 }
-
 @media (min-width: 768px) {
   .bd-placeholder-img-lg {
     font-size: 3.5rem;

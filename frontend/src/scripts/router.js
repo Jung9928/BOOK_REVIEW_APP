@@ -4,12 +4,20 @@ import Login from "@/pages/Login";
 import {createRouter, createWebHistory} from "vue-router";
 import Signup from "@/pages/Signup";
 import GeneralForum from "@/pages/GeneralForum";
+import GeneralForumPost from "@/pages/GeneralForumPost";
+import GeneralForumPostDetail from "@/pages/GeneralForumPostDetail";
+import GeneralForumModify from "@/pages/GeneralForumModify";
+import MemberInfo from "@/pages/MemberInfo";
 
 const routes = [
     {path: '/', component: Home},
     {path: '/login', component: Login},
     {path: '/signup', component: Signup},
-    {path: '/generalForum', component: GeneralForum}
+    {path: '/memberInfo', component: MemberInfo, props: true},
+    {path: '/generalForum', component: GeneralForum},
+    {path: '/generalForumPost', component: GeneralForumPost},
+    {path: '/generalForumModify', component: GeneralForumModify},
+    {path: '/generalForumPostDetail', component: GeneralForumPostDetail, props: true}
 ]
 
 const router = createRouter({

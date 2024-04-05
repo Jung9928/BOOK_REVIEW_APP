@@ -351,7 +351,6 @@ export default {
       }
 
       // 모든 조건을 통과한 경우, 실제 회원가입 로직을 수행
-      // 여기에 실제 회원가입 로직을 추가하세요.
       axios.post('/api/v1/members/signup', {
         memberId: memberId.value,
         email: email.value,

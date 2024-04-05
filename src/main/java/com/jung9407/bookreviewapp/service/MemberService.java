@@ -5,6 +5,7 @@ import com.jung9407.bookreviewapp.exception.ErrorCode;
 import com.jung9407.bookreviewapp.model.dao.RedisDAO;
 import com.jung9407.bookreviewapp.model.dto.MemberDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberLoginRequestDTO;
+import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberModifyRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.jwt.TokenResponseDTO;
 import com.jung9407.bookreviewapp.model.entity.MemberEntity;
@@ -20,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,11 +57,18 @@ public class MemberService {
 //        memberRepository.save(memberEntity);
 //    }
 
+    // ID 정보 가져오기
     public MemberDTO getMemberByMemberId(String memberId) {
         return memberRepository.findByMemberId(memberId).map(MemberDTO::entityToMemberDTO).orElseThrow(() ->
                 new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s는 존재하지 않는 ID 입니다.", memberId)));
     }
 
+
+    // Email 정보 가져오기
+    public MemberDTO getMemberByMemberEmail(String memberId) {
+        return memberRepository.findEmailByMemberId(memberId).map(MemberDTO::entityToMemberDTO).orElseThrow(() ->
+                new ApplicationException(ErrorCode.EMAIL_NOT_FOUND, String.format("%s는 존재하지 않는 Email 입니다.", memberId)));
+    }
 
     // 회원가입
     @Transactional
@@ -157,5 +167,28 @@ public class MemberService {
             throw new IllegalArgumentException("이미 로그아웃한 유저입니다.");
         }
         return ResponseEntity.ok("로그아웃 완료");
+    }
+
+
+    // 회원정보수정
+    @Transactional
+    public MemberDTO modifyInfo(MemberModifyRequestDTO memberModifyRequestDTO) {
+
+        // 1. 회원 존재 여부 체크(기존 회원 정보 가져오기)
+        MemberEntity memberEntity = memberRepository.findByMemberId(memberModifyRequestDTO.getMemberId()).orElseThrow(() ->
+                new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s는 가입되어있지않은 ID입니다.", memberModifyRequestDTO.getMemberId())));
+
+        // 2. 새로운 비밀번호 설정
+        String newPassword = encoder.encode(memberModifyRequestDTO.getPassword());
+
+        // 3. 회원정보 수정 진행 (Dirty Checking)
+        memberEntity.setPassword(newPassword);
+        memberEntity.setEmail(memberModifyRequestDTO.getEmail());
+        memberEntity.setMemberRole(memberModifyRequestDTO.getMemberRole());
+
+        // 4. 수정된 회원 정보 저장
+        MemberEntity updatedMemberEntity = memberRepository.save(memberEntity);
+
+        return MemberDTO.entityToMemberDTO(updatedMemberEntity);
     }
 }

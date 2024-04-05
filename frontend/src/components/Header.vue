@@ -17,7 +17,7 @@
       <ul class="nav me-auto">
         <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2 active" aria-current="page">공지</router-link></li>
         <li class="nav-item"><router-link to="/generalForum" class="nav-link link-dark px-2">자유게시판</router-link></li>
-        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">도서 추천게시판</router-link></li>
+<!--        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">도서 추천게시판</router-link></li>-->
         <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">FAQ</router-link></li>
         <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">삭제/문의</router-link></li>
       </ul>
@@ -36,7 +36,7 @@
               {{ $store.state.memberId }}님
             </button>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">회원정보 보기</a></li>
+              <li><router-link to="{name: 'MemberInfo', query: {memberId: memberId, email: email}}" class="dropdown-item" @click="goToMemberInfoPage()">회원정보 보기</router-link></li>
               <li><a class="dropdown-item" href="#">작성게시글 보기</a></li>
               <li><a class="dropdown-item" href="#">작성댓글 확인</a></li>
               <li @click="logout()" ><router-link to="/login" class="dropdown-item">로그아웃</router-link></li>
@@ -44,7 +44,7 @@
           </div>
         </li>
 
-        <li class="nav-item"><router-link to="/signup" class="nav-link link-dark px-2">회원가입</router-link></li>
+        <li class="nav-item"><router-link to="/signup" class="nav-link link-dark px-2">회원 가입</router-link></li>
       </ul>
     </div>
   </nav>
@@ -56,6 +56,7 @@ import router from "@/scripts/router";
 import { computed } from "vue";
 import { useStore } from 'vuex';
 import axiosInterceptors from "@/common/interceptors";
+import axios from "axios";
 
 export default {
   name: 'Header',
@@ -77,9 +78,27 @@ export default {
         store.dispatch('logout');
         router.push({path: "/"});
       });
-    }
+    };
 
-    return { isAccessToken, logout };
+    const goToMemberInfoPage = () => {
+      const {memberId} = store.state;
+      console.log("memberId : " + memberId);
+      let email = '';
+      axios.get(`api/v1/members/email-info/${memberId}`)
+          .then((res) => {
+            // email 정보 가져오기 성공
+            email = res.data.result;
+            console.log("email1 : " + email);
+            router.push({path: "/memberInfo", query: {memberId: memberId, email: email}});
+          })
+          .catch((err) => {
+            console.error("error message : " + err);
+            window.alert("해당 유저의 email 정보를 가져오는데 실패했습니다");
+            router.push({path: "/"});
+          })
+      }
+
+    return { isAccessToken, logout, goToMemberInfoPage };
   },
 }
 </script>

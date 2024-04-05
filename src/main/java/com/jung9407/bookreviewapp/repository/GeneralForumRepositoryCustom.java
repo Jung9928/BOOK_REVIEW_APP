@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.jung9407.bookreviewapp.model.entity.QGeneralForumEntity.generalForumEntity;
@@ -55,7 +56,7 @@ public class GeneralForumRepositoryCustom {
         }
         else if("content".equals(searchCategory)) {
             if(StringUtils.hasLength(searchCategory)) {
-                return generalForumEntity.content.contains(searchValue);
+                return generalForumEntity.content.in(searchValue.getBytes(StandardCharsets.UTF_8));
             }
         }
 
