@@ -64,12 +64,12 @@ public class RedisDAO {
         redisTemplate.opsForValue().set(accessToken, message, minutes, TimeUnit.MINUTES);
     }
 
-    public String getBlackList(String memberId) {
-        return redisTemplate.opsForValue().get(memberId);
+    public String getBlackList(String accessToken) {
+        return redisTemplate.opsForValue().get(accessToken);
     }
 
-    public boolean deleteBlackList(String memberId) {
-        return Boolean.TRUE.equals(redisTemplate.delete(memberId));
+    public boolean deleteBlackList(String accessToken) {
+        return Boolean.TRUE.equals(redisTemplate.delete(accessToken));
     }
 
     /**

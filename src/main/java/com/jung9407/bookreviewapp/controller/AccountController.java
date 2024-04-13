@@ -5,6 +5,7 @@ import com.jung9407.bookreviewapp.model.dto.MemberDTO;
 import com.jung9407.bookreviewapp.model.dto.jwt.CustomMemberDetails;
 import com.jung9407.bookreviewapp.model.dto.jwt.ReissueTokenRequest;
 import com.jung9407.bookreviewapp.model.dto.jwt.TokenResponseDTO;
+import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberDeleteRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberLoginRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberModifyRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
@@ -176,13 +177,13 @@ public class AccountController {
         return ResponseResultCode.success(MemberModifyResponseDTO.getMemberField(memberDTO));
     }
 
-//    // 회원탈퇴
-//    @DeleteMapping("/api/account/{id}")
-//    public ResponseEntity<String> deleteUser(@PathVariable String memberId, HttpServletRequest request) {
-//        log.info("회원탈퇴요청 ID : {}", memberId);
-//        log.info("탈퇴 토큰 : {}", request.getHeader("Authorization"));
-//        memberService.deleteMember(request);
-//
-//        return new ResponseEntity<>("회원 탈퇴 성공", HttpStatus.OK);
-//    }
+    // 회원탈퇴
+    @DeleteMapping("/delete-info")
+    public ResponseEntity<String> deleteUser(@RequestBody MemberDeleteRequestDTO memberDeleteRequestDTO) {
+        log.info("회원탈퇴요청 ID : {}", memberDeleteRequestDTO.getMemberId());
+        log.info("탈퇴 토큰 : {}", memberDeleteRequestDTO.getAccessToken());
+
+        memberService.deleteMember(memberDeleteRequestDTO);
+        return new ResponseEntity<>("회원 탈퇴 성공", HttpStatus.OK);
+    }
 }

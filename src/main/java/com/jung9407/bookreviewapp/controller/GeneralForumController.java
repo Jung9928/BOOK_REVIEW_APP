@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -83,29 +84,23 @@ public class GeneralForumController {
         return ResponseResultCode.success(generalForumResponseDTO);
     }
 
-    @GetMapping("/content")
-    public String content(Model model, @RequestParam(required = false) Long postId) {
+    // 게시글 추천 처리
+    @PostMapping("/generalForum/{postId}/recommend")
+    public ResponseResultCode<Void> countRecommend(@PathVariable Long postId, Authentication authentication) {
 
-        if(postId == null) {
-            model.addAttribute("post", new GeneralForumEntity());
-        } else {
-            GeneralForumEntity post = generalForumRepository.findById(postId).orElse(null);
-            model.addAttribute("post", post);
-        }
+        log.info("postId : " + postId);
+        log.info("memberId : " + authentication.getName());
+        generalForumService.countRecommend(postId, authentication.getName());
 
-        model.addAttribute("post", new GeneralForumEntity());
-        return "post/content";
+        return ResponseResultCode.success();
     }
 
-    @PostMapping("/content")
-    public String postUpload(@ModelAttribute GeneralForumEntity generalForumEntity, BindingResult bindingResult) {
+    // 게시글 추천 수 가져오기
+    @GetMapping("/generalForum/{postId}/recommend")
+    public ResponseResultCode<Long> getRecommendCounting(@PathVariable Long postId) {
 
-        postValidator.validate(generalForumEntity, bindingResult);
-        if(bindingResult.hasErrors()) {
-            return "post/content";
-        }
+        Long recommendCount = generalForumService.getRecommendCounting(postId);
 
-        generalForumRepository.save(generalForumEntity);
-        return "redirect:/post/list";
+        return ResponseResultCode.success(recommendCount);
     }
 }

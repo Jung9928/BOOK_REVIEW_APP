@@ -6,9 +6,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -31,14 +34,15 @@ public class GeneralForumEntity {
    private String title;
 
    @Lob
-   @Column(name = "content", columnDefinition = "BLOB")
+   @Column(name = "content", columnDefinition = "BLOB", nullable = false)
    private byte[] content;
 
-   @Column(name = "vw_cnt")
+   @Column(name = "vw_cnt", nullable = false)
+   @ColumnDefault("0")
    private int viewCount;
 
-   @Column(name = "rcmnd_cnt")
-   private int recommendCount;
+   @OneToMany(mappedBy = "generalForum", orphanRemoval = true)
+   private List<CommentEntity> comments = new ArrayList<>();
 
    @Column(name = "reg_at")
    private Timestamp registeredAt;

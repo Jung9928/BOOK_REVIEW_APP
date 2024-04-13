@@ -7,25 +7,26 @@ import com.jung9407.bookreviewapp.model.dto.requestDTO.GeneralForumSearchConditi
 import com.jung9407.bookreviewapp.model.dto.responseDTO.GeneralForumPagingResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.GeneralForumResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.PostModifyResponseDTO;
+import com.jung9407.bookreviewapp.model.dto.responseDTO.ResponseResultCode;
 import com.jung9407.bookreviewapp.model.entity.MemberEntity;
 import com.jung9407.bookreviewapp.model.entity.GeneralForumEntity;
+import com.jung9407.bookreviewapp.model.entity.RecommendEntity;
 import com.jung9407.bookreviewapp.repository.GeneralForumRepositoryCustom;
 import com.jung9407.bookreviewapp.repository.MemberRepository;
 import com.jung9407.bookreviewapp.repository.GeneralForumRepository;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.jung9407.bookreviewapp.repository.RecommendEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -37,6 +38,9 @@ public class GeneralForumService {
 
     private final GeneralForumRepository generalForumRepository;
     private final MemberRepository memberRepository;
+
+    private final RecommendEntityRepository recommendEntityRepository;
+
 
     // 게시글 목록 조회
     public GeneralForumPagingResponseDTO<List<GeneralForumResponseDTO>> getForumBoardList(Pageable pageable, GeneralForumSearchConditionDTO generalForumSearchConditionDTO) {
@@ -52,7 +56,6 @@ public class GeneralForumService {
 //                    .content(generalForumEntity.getContent())
                     .title(generalForumEntity.getTitle())
                     .vw_cnt(generalForumEntity.getViewCount())
-                    .rcmnd_cnt(generalForumEntity.getRecommendCount())
                     .registeredAt(generalForumEntity.getRegisteredAt())
                     .modifiedAt(generalForumEntity.getModifiedAt())
                     .build();
@@ -77,14 +80,13 @@ public class GeneralForumService {
 
         // 게시글이 존재하는 지
         GeneralForumEntity generalForumEntity = generalForumRepository.findById(postId).orElseThrow(() ->
-                new ApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s 게시글을 찾을 수 없습니다.", postId)));
+                new ApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s번 게시글을 찾을 수 없습니다.", postId)));
 
         log.info("postId : " + generalForumEntity.getPostId());
         log.info("memberId : " + generalForumEntity.getMember().getMemberId());
         log.info("title : " + generalForumEntity.getTitle());
         log.info("content : " + generalForumEntity.getContent());
         log.info("viewCount : " + generalForumEntity.getViewCount());
-        log.info("recommendCount : " + generalForumEntity.getRecommendCount());
         log.info("registeredAt : " + generalForumEntity.getRegisteredAt());
         log.info("modifiedAt : " + generalForumEntity.getModifiedAt());
 
@@ -93,7 +95,6 @@ public class GeneralForumService {
         generalForumResponseDTO.setTitle(generalForumEntity.getTitle());
         generalForumResponseDTO.setContent(new String(generalForumEntity.getContent(), StandardCharsets.UTF_8));
         generalForumResponseDTO.setVw_cnt(generalForumEntity.getViewCount());
-        generalForumResponseDTO.setRcmnd_cnt(generalForumEntity.getRecommendCount());
         generalForumResponseDTO.setRegisteredAt(generalForumEntity.getRegisteredAt());
         generalForumResponseDTO.setModifiedAt(generalForumEntity.getModifiedAt());
 
@@ -122,7 +123,7 @@ public class GeneralForumService {
 
         // 게시글이 존재하는 지
         GeneralForumEntity generalForumEntity = generalForumRepository.findById(postId).orElseThrow(() ->
-                new ApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s 게시글을 찾을 수 없습니다.", postId)));
+                new ApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s게시글을 찾을 수 없습니다.", postId)));
 
         // 게시글 접근 권한 (게시글을 작성한 사람인지) 체크
         if (generalForumEntity.getMember() != memberEntity) {
@@ -137,14 +138,14 @@ public class GeneralForumService {
 
     // 게시글 삭제
     @Transactional
-    public void delete(String memberId, Long postId) {
+    public void delete(String memberId, long postId) {
 
         MemberEntity memberEntity = memberRepository.findByMemberId(memberId).orElseThrow(() ->
                 new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s은 존재하지 않는 회원입니다. 회원가입 후 작성 바랍니다.", memberId)));
 
         // 게시글이 존재하는 지
         GeneralForumEntity generalForumEntity = generalForumRepository.findById(postId).orElseThrow(() ->
-                new ApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s게시글을 찾을 수 없습니다.", postId)));
+                new ApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s번 게시글을 찾을 수 없습니다.", postId)));
 
         // 게시글 접근 권한 (게시글을 작성한 사람인지) 체크
         if (generalForumEntity.getMember() != memberEntity) {
@@ -153,6 +154,46 @@ public class GeneralForumService {
 
         generalForumRepository.delete(generalForumEntity);
     }
+
+    // 게시글 추천 카운팅
+    @Transactional
+    public void countRecommend(Long postId, String memberId) {
+
+        // 1. 게시글이 존재하는 지 검증
+        GeneralForumEntity generalForumEntity = generalForumRepository.findById(postId).orElseThrow(() ->
+                new ApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s번 게시글을 찾을 수 없습니다.", postId)));
+
+        // 2. 회원 존재 여부 검증
+        MemberEntity memberEntity = memberRepository.findByMemberId(memberId).orElseThrow(() ->
+                new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s은 존재하지 않는 회원입니다. 회원가입 후 작성 바랍니다.", memberId)));
+
+        // 3. 게시글 추천을 이미 했는지 검증 -> throw
+        recommendEntityRepository.findByMemberAndGeneralForum(memberEntity, generalForumEntity).ifPresent(it -> {
+            throw new ApplicationException(ErrorCode.ALREADY_RECOMMENDED, String.format("%s님은 %s번 게시글에 대해 이미 추천을 한 상태입니다.", memberId, postId));
+        });
+
+        // 4. 게시글 추천 진행
+        recommendEntityRepository.save(RecommendEntity.getRecommendEntity(memberEntity, generalForumEntity));
+    }
+
+
+    // 게시글 추천 수 가져오기
+    public long getRecommendCounting(Long postId) {
+
+        // 1. 게시글이 존재하는 지 검증
+        GeneralForumEntity generalForumEntity = generalForumRepository.findById(postId).orElseThrow(() ->
+                new ApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s번 게시글을 찾을 수 없습니다.", postId)));
+
+        // 2. 게시글 추천 수 가져오기
+        log.info("postId : " + generalForumEntity.getPostId());
+
+//        List<RecommendEntity> recommendEntities = recommendEntityRepository.findAllByGeneralForum(generalForumEntity);
+
+//        return recommendEntities.size();
+        return recommendEntityRepository.countByGeneralForum(generalForumEntity);
+    }
+
+
 
     // 게시글 조회 수 증가
 //    @Transactional
@@ -174,5 +215,23 @@ public class GeneralForumService {
 //                GeneralForum ;
 //            }
 //        }
+//    }
+
+//    public void addViewCntToRedis(Long postId) {
+//        String key = "generalForumViewCnt::" + postId;
+//
+//        // 캐시에 값이 없으면 레포지토리에서 조회, 있으면 값을 증가시킴
+//        ValueOperations valueOperations = redisTemplate.opsForValue();
+//
+//        if(valueOperations.get(key) == null) {
+//            valueOperations.set(
+//                    key,
+//                    String.valueOf(generalForumRepository.findGeneralForumViewCountByPostId(postId)),
+//            Duration.ofMinutes(5));
+//        }
+//        else {
+//            valueOperations.increment(key);
+//        }
+//        log.info("viewCount : {}", valueOperations.get(key));
 //    }
 }

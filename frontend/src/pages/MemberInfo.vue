@@ -41,9 +41,12 @@
               </div>
 
               <!-- 나머지 입력 폼들 ... -->
+              <div class="mb-3">
+                <button type="submit" class="btn btn-outline-dark w-100" @click="modifyMemberInfo">정보 수정하기</button>
+              </div>
 
               <div class="mb-3">
-                <button type="submit" class="btn btn-outline-dark w-100" @click="memberInfoModify">정보 수정하기</button>
+                <button type="submit" class="btn btn-outline-dark w-100" @click="deleteMemberInfo">회원 탈퇴하기</button>
               </div>
             </form>
           </div>
@@ -58,6 +61,7 @@ import { useRoute} from "vue-router";
 import axios from "axios";
 import router from "@/scripts/router";
 import {ref, onMounted } from "vue";
+import {useStore} from "vuex";
 
 export default {
 
@@ -103,8 +107,8 @@ export default {
       }
     };
 
-    // 회원가입 버튼을 눌렀을 시, 실행되는 메소드
-    const memberInfoModify = () => {
+    // 회원정보 수정 버튼을 눌렀을 시, 실행되는 메소드
+    const modifyMemberInfo = () => {
       // 모든 조건 검증
       if (!isPasswordValid.value || !isConfirmPasswordValid.value) {
         window.alert("비밀번호를 확인해주세요");
@@ -125,10 +129,30 @@ export default {
           })
     };
 
+    // 회원 탈퇴 버튼을 눌렀을 시, 실행되는 메소드
+    const deleteMemberInfo = () => {
+
+      window.alert("정말 탈퇴 하시겠습니까?\n (탈퇴 후, 회원 관련 정보 복구는 불가합니다)");
+
+      axios.delete(`/api/v1/members/delete-info`, {
+        memberId: memberId.value,
+        password: password.value,
+        accessToken: useStore().state.accessToken,
+      })
+          .then(() => {
+            window.alert("탈퇴 완료");
+            router.push({path:"/"});
+          })
+          .catch(() => {
+            window.alert("회원 정보 탈퇴 중에 오류가 발생했습니다");
+          })
+    };
+
     return {
       memberId,
       email,
-      memberInfoModify,
+      modifyMemberInfo,
+      deleteMemberInfo,
       password,
       confirmPassword,
 

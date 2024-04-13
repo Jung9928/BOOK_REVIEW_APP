@@ -12,7 +12,7 @@
     <input v-model="searchValue" type="text" placeholder="검색어를 입력하세요..." @keyup.enter="search" class="search-input">
 
     <!-- 검색 버튼 -->
-    <button @click="search" type="button" class="btn btn-outline-dark" style="width: 70px; height: 46px">검색</button>
+    <button @click="fetchGeneralForums" type="button" class="btn btn-outline-dark" style="width: 70px; height: 46px">검색</button>
   </div>
 
   <!-- "글 작성하기" 버튼 -->
@@ -27,10 +27,7 @@
   <!-- 게시글 목록 컴포넌트 삽입 -->
 <!--  <PostView :items="generalForumList" :fields="fields" @click="getContent"/>-->
   <div>
-    <b-table class="post-table" :items="generalForumList" @row-clicked="getContent">
-
-    </b-table>
-
+    <b-table class="post-table" :items="generalForumList" @row-clicked="getContent" @click="getCommentList"></b-table>
   </div>
 
   <!-- 페이지네이션 -->
@@ -67,9 +64,13 @@ export default {
     const currentPage = ref(1);
     const totalPages = ref(0);
     const searchCategory = ref('title');
+    const searchValue = ref('');
+
+    const commentList = ref([]);
+    let postId = null;
 
     const searchGeneralForums = (searchValue, searchCategory) => {
-      fetchGeneralForums(searchValue, searchCategory);
+      fetchGeneralForums(searchValue.value, searchCategory.value);
     }
 
     const fetchGeneralForums = (searchValue, searchCategory) => {
@@ -84,19 +85,23 @@ export default {
           .then((res) => {
             if(res.data.resultCode == "OK") {
 
+              console.log("searchValue : " + searchValue);
+              console.log("searchCategory : " + searchCategory);
+
               generalForumList.value = res.data.data.map(item => ({
                 번호 : item.post_id,
                 제목 : item.title,
                 글쓴이 : item.member_id,
                 날짜 : formatDate(item.registeredAt),
-                조회수 : item.vw_cnt,
-                추천수 : item.rcmnd_cnt,
+                조회수 : item.vw_cnt
               }));
               console.log("generalForumList : " );
               totalPages.value = res.data.generalForumPaginationDTO.totalPageCnt;
             }
           })
           .catch((err) => {
+            console.log("searchValue : " + searchValue);
+            console.log("searchCategory : " + searchCategory);
             if(err.message.indexOf('Network Error') > -1) {
               alert('네트워크가 원활하지 않습니다. \n 잠시 후, 다시 시도해주세요.');
             }
@@ -183,7 +188,8 @@ export default {
     // 게시글 목록을 클릭해서 게시글 상세내용 가져오기
     const getContent = (item) => {
 
-      const postId = JSON.stringify(item['번호']);
+      // const postId = JSON.stringify(item['번호']);
+      postId = JSON.stringify(item['번호']);
       console.log("postId : " + postId);
 
       // 게시글 번호를 기반으로 해당 게시글의 내용을 가져오는 로직
@@ -195,10 +201,24 @@ export default {
             // console.log("content : " + JSON.stringify(res.data.result.content));
 
             const content = JSON.stringify(res.data.result.content);
-            router.push({path:"/generalForumPostDetail", query: {postId : postId, title: title, content: content}});
+            const memberId = JSON.stringify(res.data.result.member_id);
+            router.push({path:"/generalForumPostDetail", query: {postId : postId, title: title, content: content, memberId: memberId}});
           })
           .catch((err) => {
             console.error('게시글을 가져오는 중 오류 발생:', err);
+          });
+    }
+
+    // 게시글 클릭 시, 해당 게시글의 (대)댓글 가져오기
+    const getCommentList = () => {
+      console.log("postId2 : " + postId);
+
+      axios.get(`/api/v1/comment/reply/${postId}`)
+          .then((res) => {
+            commentList.value = res.data.data;
+          })
+          .catch((err) => {
+            console.error('댓글 리스트를 가져오는 중 오류 발생:', err);
           });
     }
 
@@ -206,7 +226,9 @@ export default {
 
     return {
       generalForumList,
+      commentList,
       searchCategory,
+      searchValue,
       currentPage,
       totalPages,
       goFirstPage,
@@ -218,7 +240,9 @@ export default {
       displayedPages,
 
       searchGeneralForums,
-      getContent
+      getContent,
+      getCommentList,
+      fetchGeneralForums
     };
   },
 }

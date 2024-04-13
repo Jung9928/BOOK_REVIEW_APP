@@ -2,7 +2,9 @@ package com.jung9407.bookreviewapp.repository;
 
 import com.jung9407.bookreviewapp.model.dto.requestDTO.GeneralForumSearchConditionDTO;
 import com.jung9407.bookreviewapp.model.entity.GeneralForumEntity;
+import com.jung9407.bookreviewapp.model.entity.QRecommendEntity;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.jung9407.bookreviewapp.model.entity.QGeneralForumEntity.generalForumEntity;
+import static com.jung9407.bookreviewapp.model.entity.QRecommendEntity.recommendEntity;
 
 @RequiredArgsConstructor
 @Repository
@@ -29,6 +32,7 @@ public class GeneralForumRepositoryCustom {
                 queryFactory.selectFrom(generalForumEntity).where(
                         searchKeywords(generalForumSearchConditionDTO.getSearchCategory(), generalForumSearchConditionDTO.getSearchValue())
                 );
+
 
         long total = query.stream().count();
 

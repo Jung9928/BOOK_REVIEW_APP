@@ -4,6 +4,7 @@ import com.jung9407.bookreviewapp.exception.ApplicationException;
 import com.jung9407.bookreviewapp.exception.ErrorCode;
 import com.jung9407.bookreviewapp.model.dao.RedisDAO;
 import com.jung9407.bookreviewapp.model.dto.MemberDTO;
+import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberDeleteRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberLoginRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberModifyRequestDTO;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.MemberSignupRequestDTO;
@@ -13,6 +14,7 @@ import com.jung9407.bookreviewapp.repository.MemberRepository;
 import com.jung9407.bookreviewapp.util.CookieUtils;
 import com.jung9407.bookreviewapp.util.JwtProvider;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -190,5 +192,30 @@ public class MemberService {
         MemberEntity updatedMemberEntity = memberRepository.save(memberEntity);
 
         return MemberDTO.entityToMemberDTO(updatedMemberEntity);
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public ResponseEntity deleteMember(MemberDeleteRequestDTO memberDeleteRequestDTO) {
+
+        // 1. 회원가입 여부 체크
+        MemberEntity memberEntity = memberRepository.findByMemberId(memberDeleteRequestDTO.getMemberId()).orElseThrow(() ->
+                new ApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s는 가입되어있지않은 ID입니다.", memberDeleteRequestDTO.getMemberId())));
+
+        // 2. 탈퇴 과정에서 입력한 비밀번호 검증
+        if(!encoder.matches(memberDeleteRequestDTO.getPassword(), memberEntity.getPassword())) {
+            throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        // 3. redis에 accessToken이 blackList로 등록되어있는지 확인 -> 등록되어있다면 탈퇴 불가 (재로그인 후, 탈퇴 진행)
+        //    refresh 토큰도 삭제 진행.
+        if(redisDAO.hasKey(memberDeleteRequestDTO.getAccessToken())) {
+            redisDAO.deleteBlackList(memberDeleteRequestDTO.getAccessToken());
+            redisDAO.deleteRefreshToken(memberDeleteRequestDTO.getMemberId());
+        }
+
+        memberRepository.deleteByMemberId(memberDeleteRequestDTO.getMemberId());
+
+        return ResponseEntity.ok("회원 탈퇴 완료");
     }
 }
