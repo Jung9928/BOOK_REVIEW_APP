@@ -42,10 +42,8 @@ public class CommentService {
     }
 
     @Transactional
-    public Page<CommentDTO> pageList(GeneralForumEntity generalForumEntity, Pageable pageable) {
-        Page<CommentEntity> commentEntities;
-
-        commentEntities = commentRepository.findCommentEntityByGeneralForum(generalForumEntity, pageable);
+    public Page<CommentDTO> pageList(GeneralForumEntity generalForum, Pageable pageable) {
+        Page<CommentEntity> commentEntities = commentRepository.findCommentEntityByGeneralForum(generalForum, pageable);
         return commentEntities.map(commentEntity -> CommentDTO.entityToCommentDTO(commentEntity));
     }
 

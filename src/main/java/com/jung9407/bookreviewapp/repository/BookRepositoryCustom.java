@@ -2,7 +2,8 @@ package com.jung9407.bookreviewapp.repository;
 
 import com.jung9407.bookreviewapp.model.dto.requestDTO.BookSearchConditionDTO;
 import com.jung9407.bookreviewapp.model.entity.BookEntity;
-import com.jung9407.bookreviewapp.util.BookSerialNumber;
+import com.jung9407.bookreviewapp.util.BookMainCategory;
+import com.jung9407.bookreviewapp.util.BookSubCategory;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.jung9407.bookreviewapp.model.entity.QBookEntity.bookEntity;
@@ -28,17 +30,16 @@ public class BookRepositoryCustom {
         JPAQuery<BookEntity> query =
                 queryFactory.selectFrom(bookEntity).where(
                         searchMainKeywords(bookSearchConditionDTO.getSearchMainCategory()),
-                        searchSubKeywords(bookSearchConditionDTO.getSearchSubCategory(), bookSearchConditionDTO.getSearchValue())
+                        searchSubKeywords(bookSearchConditionDTO.getSearchSubCategory()),
+                        searchDetailKeywords(bookSearchConditionDTO.getSearchDetailCategory(), bookSearchConditionDTO.getSearchValue())
                 );
 
         long total = query.stream().count();        // 전체 도서 데이터 카운트 후, 아래에서 조건 처리
 
         List<BookEntity> results = query
-                .where(searchMainKeywords(bookSearchConditionDTO.getSearchSubCategory()),
-                        searchSubKeywords(bookSearchConditionDTO.getSearchSubCategory(), bookSearchConditionDTO.getSearchValue()))
                 // 페이지 번호
                 // 프론트에서 맨 처음 로딩 시, 1페이지 값을 전달하므로 getPageNumber에 -1하여 offset 첫 값을 0설정
-                // ex) limit(0, 10) -> limit(10, 10) -> limit(20, 10)
+                // ex) limit(0, 9) -> limit(9, 18) -> limit(18, 27)
                 .offset((long)(pageable.getPageNumber()-1) * pageable.getPageSize())
                 .limit(pageable.getPageSize())      // 페이지에 표시할 도서 갯수
                 .orderBy(bookEntity.publishDate.desc())
@@ -47,7 +48,7 @@ public class BookRepositoryCustom {
         return new PageImpl<>(results, pageable, total);
     }
 
-    private BooleanExpression searchSubKeywords(String searchSubCategory, String searchValue) {
+    private BooleanExpression searchDetailKeywords(String searchSubCategory, String searchValue) {
         if("title".equals(searchSubCategory)) {
             if (StringUtils.hasLength(searchValue)) {
                 return bookEntity.title.contains(searchValue);
@@ -67,32 +68,55 @@ public class BookRepositoryCustom {
     }
 
     private BooleanExpression searchMainKeywords(String searchMainCategory) {
-        if(BookSerialNumber.COMPUTER_ENGINEERING.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
+//        if(BookMainCategory.COMPUTER_ENGINEERING.getBookMainCategory().equals(searchMainCategory)) {
+//            return bookEntity.main_category.contains(searchMainCategory);
+//        }
+//        else if(BookMainCategory.COMPUTER_BEGINNER.getBookMainCategory().equals(searchMainCategory)) {
+//            return bookEntity.main_category.contains(searchMainCategory);
+//        }
+//        else if(BookMainCategory.MOBILE_PROGRAMMING.getBookMainCategory().equals(searchMainCategory)) {
+//            return bookEntity.main_category.contains(searchMainCategory);
+//        }
+//        else if(BookMainCategory.PROGRAMMING_LANGUAGE.getBookMainCategory().equals(searchMainCategory)) {
+//            return bookEntity.main_category.contains(searchMainCategory);
+//        }
+//        else if(BookMainCategory.WEBSITE.getBookMainCategory().equals(searchMainCategory)) {
+//            return bookEntity.main_category.contains(searchMainCategory);
+//        }
+//        else if(BookMainCategory.OS_DATABASE.getBookMainCategory().equals(searchMainCategory)) {
+//            return bookEntity.main_category.contains(searchMainCategory);
+//        }
+//        else if(BookMainCategory.GAME.getBookMainCategory().equals(searchMainCategory)) {
+//            return bookEntity.main_category.contains(searchMainCategory);
+//        }
+//        else if(BookMainCategory.NETWORK_HACKING_SECURITY.getBookMainCategory().equals(searchMainCategory)) {
+//            return bookEntity.main_category.contains(searchMainCategory);
+//        }
+//        else {
+//            return null;
+//        }
+
+        BookMainCategory category = Arrays.stream(BookMainCategory.values())
+                .filter(c -> c.getCategoryCode().equals(searchMainCategory))
+                .findFirst()
+                .orElse(null);
+
+        if (category != null) {
+            return bookEntity.main_category.contains(category.getCategoryCode());
         }
-        else if(BookSerialNumber.COMPUTER_BEGINNER.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
+        else {
+            return null;
         }
-        else if(BookSerialNumber.MOBILE_PROGRAMMING.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
-        }
-        else if(BookSerialNumber.PROGRAMMING_LANGUAGE.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
-        }
-        else if(BookSerialNumber.WEBSITE.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
-        }
-        else if(BookSerialNumber.OS_DATABASE.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
-        }
-        else if(BookSerialNumber.GAME.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
-        }
-        else if(BookSerialNumber.NETWORK_HACKING_SECURITY.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
-        }
-        else if(BookSerialNumber.GRAPHIC_DESIGN_MULTIMEDIA.getBookSerialNumber().equals(searchMainCategory)) {
-            return bookEntity.main_category.contains(searchMainCategory);
+    }
+
+    private BooleanExpression searchSubKeywords(String searchSubCategory) {
+        BookSubCategory category = Arrays.stream(BookSubCategory.values())
+                .filter(c -> c.getCategoryCode().equals(searchSubCategory))
+                .findFirst()
+                .orElse(null);
+
+        if(category != null) {
+            return bookEntity.sub_category.contains(category.getCategoryCode());
         }
         else {
             return null;

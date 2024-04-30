@@ -3,6 +3,7 @@ package com.jung9407.bookreviewapp.service;
 import com.jung9407.bookreviewapp.exception.ApplicationException;
 import com.jung9407.bookreviewapp.exception.ErrorCode;
 import com.jung9407.bookreviewapp.model.dto.GeneralForumPaginationDTO;
+import com.jung9407.bookreviewapp.model.dto.jwt.CustomMemberDetails;
 import com.jung9407.bookreviewapp.model.dto.requestDTO.GeneralForumSearchConditionDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.GeneralForumPagingResponseDTO;
 import com.jung9407.bookreviewapp.model.dto.responseDTO.GeneralForumResponseDTO;
@@ -15,12 +16,17 @@ import com.jung9407.bookreviewapp.repository.GeneralForumRepositoryCustom;
 import com.jung9407.bookreviewapp.repository.MemberRepository;
 import com.jung9407.bookreviewapp.repository.GeneralForumRepository;
 import com.jung9407.bookreviewapp.repository.RecommendEntityRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -193,29 +199,51 @@ public class GeneralForumService {
         return recommendEntityRepository.countByGeneralForum(generalForumEntity);
     }
 
+    // 내가 작성한 게시글 조회
+    public Page<GeneralForumResponseDTO> getMyPostList(long id, Pageable pageable) {
+        Page<GeneralForumEntity> generalForumEntities = generalForumRepository.findGeneralForumEntitiesByMemberId(id, pageable);
+
+//        return generalForumEntities.map(generalForumEntity -> GeneralForumResponseDTO.builder().build());
+        return generalForumEntities.map(generalForumEntity -> GeneralForumResponseDTO.entityToMemberDTO(generalForumEntity));
+    }
+
 
 
     // 게시글 조회 수 증가
-//    @Transactional
-//    public void viewCount(Long id, HttpServletRequest request, HttpServletResponse response) {
-//        Cookie oldCookie = null;
-//        Cookie[] cookies = request.getCookies();
-//
-//        if(cookies != null) {
-//            for(Cookie cookie : cookies) {
-//                if(cookie.getName().equals("ForumView")) {
-//                    oldCookie = cookie;
-//                }
-//            }
-//        }
-//
-//        // 게시물 조회 수 증가
-//        if(oldCookie != null) {
-//            if(!oldCookie.getValue().contains("[" + id.toString() + "]")) {
-//                GeneralForum ;
-//            }
-//        }
-//    }
+    @Transactional
+    public void getViewCounting(Long postId, HttpServletRequest request, HttpServletResponse response) {
+        Cookie oldCookie = null;
+        Cookie[] cookies = request.getCookies();
+
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals("viewCount")) {
+                    oldCookie = cookie;
+                }
+            }
+        }
+
+        // 게시물 조회 수 증가
+        if(oldCookie != null) {
+            if(!oldCookie.getValue().contains("[" + postId.toString() + "]")) {
+
+                // 기존 쿠기가 있지만 해당 게시글 조회 기록이 없을 때,
+                generalForumRepository.countUpView(postId);
+                oldCookie.setValue(oldCookie.getValue() + " [" + postId + "]");
+                oldCookie.setPath("/");
+                oldCookie.setMaxAge(60 * 60 * 24);
+                response.addCookie(oldCookie);
+            }
+        }
+        else {
+            // 기존 쿠기가 없을 때,
+            generalForumRepository.countUpView(postId);
+            Cookie newCookie = new Cookie("viewCount", "[" + postId + "]");
+            newCookie.setPath("/");
+            newCookie.setMaxAge(60 * 60 * 24);
+            response.addCookie(newCookie);
+        }
+    }
 
 //    public void addViewCntToRedis(Long postId) {
 //        String key = "generalForumViewCnt::" + postId;

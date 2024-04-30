@@ -13,25 +13,44 @@
       </div>
 
     </div>
-    <div v-for="comment in comments" :key="comment.id" class="comment">
-      <div class="comment-author">{{ comment.author }}</div>
-      <div class="comment-content">{{ comment.content }}</div>
+
+    <div v-if="commentList.length == 0" class="no-comments">
+      댓글이 없습니다.
     </div>
+
+    <div v-else>
+      <div v-for="comment in commentList" :key="comment.id" class="comment">
+        <div class="comment-author">{{ comment.author }}</div>
+        <div class="comment-content">{{ comment.content }}</div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 export default {
-  setup() {
-    const comments = reactive([
-      { id: 1, author: '사용자1', content: '첫 번째 댓글입니다!' },
-      { id: 2, author: '사용자2', content: '두 번째 댓글이에요~' },
-      // 댓글 데이터 추가...
-    ]);
+  name: "CommentList",
+  props: {
+    comments: Array
+  },
 
-    return { comments };
+  setup(props) {
+    const commentList = ref([]);
+
+    watchEffect(() => {
+      commentList.value = props.comments.map(comment => ({
+        id: comment.id,
+        author: comment.memberId,
+        content: comment.comment
+      }));
+    });
+
+    console.log("commentList : " + commentList.value);
+
+    return { commentList };
   }
 };
 </script>
@@ -42,7 +61,7 @@ export default {
 }
 
 .comment-input-container {
-  position: relative;;
+  position: relative;
   background-color: #f5f5f5; /* 회색 배경 적용 */
   padding: 10px; /* 간격 조정 */
   border-radius: 5px; /* 모서리 둥글게 */

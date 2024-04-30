@@ -17,6 +17,8 @@ public class ReviewResponseDTO {
 
     private int book_id;
 
+    private String isbn;
+
     private String review_title;
 
     private String review_rating;

@@ -13,7 +13,7 @@
         <span style="font-size: 12px;">평점 : {{book.rating}}</span>
       </p>
       <div class="d-flex justify-content-between align-items-center">
-        <button class="btn btn-outline-dark" @click="fetchReviews(`${book.book_id}`, `${book.site}`)" data-bs-toggle="modal" :data-bs-target="'#exampleModalToggle' + book.book_id">리뷰보기</button>
+        <button class="btn btn-outline-dark" @click="fetchReviews(`${book.book_id}`, `${book.site}`, `${book.isbn}`)" data-bs-toggle="modal" :data-bs-target="'#exampleModalToggle' + book.book_id">리뷰보기</button>
         <small class="price text-muted">
           {{lib.getNumberFormatted(book.regular_price)}}
         </small>
@@ -34,9 +34,18 @@
             </div>
 
             <div class="modal-body">
-              <!-- accordion 시작 -->
-              <ReviewTitleList v-bind:book="book" v-bind:reviewList="reviewList"/>
-              <!-- accordion 끝 -->
+
+              <template v-if="modalPopupStatus === true">
+                <!-- accordion 시작 -->
+                <ReviewTitleList v-bind:book="book" v-bind:reviewList="reviewList"/>
+                <!-- accordion 끝 -->
+              </template>
+
+              <template v-else>
+                <!-- accordion 시작 -->
+                <p>리뷰가 없습니다.</p>
+                <!-- accordion 끝 -->
+              </template>
             </div>
 
             <!-- 리뷰 데이터 페이징 처리 시작 -->
@@ -91,6 +100,8 @@ export default {
     const reviewList = ref([]);                                        // 리뷰 데이터
     const currentPage = ref(1);
     const totalPages = ref(0);
+    const totalReviewCount = ref(0);
+    const modalPopupStatus = ref(false);
 
     // book.rating 값을 별표로 변환하는 메서드
     const convertToStars = (rating) => {
@@ -100,12 +111,13 @@ export default {
     };
 
     // 리뷰 데이터 가져오기
-    const fetchReviews = (book_id, site) => {
+    const fetchReviews = (book_id, site, isbn) => {
 
       const params = {
         page: currentPage.value,
         size: 5, // 페이지당 아이템 수
         bookId: book_id,
+        isbn: isbn,
         reviewSite: site
       };
 
@@ -116,6 +128,14 @@ export default {
             if (res.data.resultCode === "OK") {
               reviewList.value = res.data.data;
               totalPages.value = res.data.reviewPaginationDTO.totalPageCnt;
+              totalReviewCount.value = res.data.reviewPaginationDTO.totalListCnt;
+
+              if (totalReviewCount.value == 0) {
+                modalPopupStatus.value = false;
+                return
+              } else {
+                modalPopupStatus.value = true;
+              }
             }
           })
           .catch((err) => {
@@ -196,10 +216,13 @@ export default {
       fetchReviews,
       convertToStars,
 
+      modalPopupStatus,
+
       goFirstPage,
       goLastPage,
       currentPage,
       totalPages,
+      totalReviewCount,
       displayedPages,
       prevPage,
       nextPage,
@@ -225,5 +248,27 @@ export default {
 
 .bold {
   font-weight: bold;
+}
+
+/* 리뷰 페이지네이션 css */
+.page-link {
+  color: #000;
+  background-color: #fff;
+  border: 1px solid #ccc;
+}
+
+.page-item.active .page-link {
+  z-index: 1;
+  color: #555;
+  font-weight:bold;
+  background-color: #f1f1f1;
+  border-color: #ccc;
+
+}
+
+.page-link:focus, .page-link:hover {
+  color: #000;
+  background-color: #fafafa;
+  border-color: #ccc;
 }
 </style>

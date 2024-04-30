@@ -83,7 +83,7 @@ export default {
               window.alert("서버에 문제가 있습니다.");
               return;
             }
-            else if(error.response.status == 401) {
+            else if(error.response.status == 401 || error.resultCode == "USER_NOT_FOUND") {
               console.error("Error message : " + error.message);
               window.alert("회원이 아닙니다. 회원가입 후, 로그인 바랍니다.");
               return;

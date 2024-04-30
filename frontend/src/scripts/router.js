@@ -8,6 +8,8 @@ import GeneralForumPost from "@/pages/GeneralForumPost";
 import GeneralForumPostDetail from "@/pages/GeneralForumPostDetail";
 import GeneralForumModify from "@/pages/GeneralForumModify";
 import MemberInfo from "@/pages/MemberInfo";
+import MyGeneralForumList from "@/pages/MyGeneralForumList";
+import MyCommentList from "@/pages/MyCommentList";
 
 const routes = [
     {path: '/', component: Home},
@@ -17,7 +19,9 @@ const routes = [
     {path: '/generalForum', component: GeneralForum},
     {path: '/generalForumPost', component: GeneralForumPost},
     {path: '/generalForumModify', component: GeneralForumModify},
-    {path: '/generalForumPostDetail', component: GeneralForumPostDetail, props: true}
+    {path: '/generalForumPostDetail', component: GeneralForumPostDetail, props: true},
+    {path: '/myGeneralForumList', name: 'MyGeneralForumList', component: MyGeneralForumList, props: true},
+    {path: '/myCommentList', name: 'MyCommentList', component: MyCommentList, props: true},
 ]
 
 const router = createRouter({

@@ -13,6 +13,8 @@ public class BookResponseDTO {
 
     private int book_id;
 
+    private String isbn;
+
     private String title;
 
     private String author;
@@ -36,6 +38,8 @@ public class BookResponseDTO {
     private Timestamp modifiedAt;
 
     private String site;
+
+    private String detailInfoPath;
 
 //    public BookResponseDTO(int book_id, String title, String author, String publisher, Timestamp publishDate, String rating, String origin_price, String sale_price, String imgPath, Timestamp modifiedAt, String site) {
 //        this.book_id = book_id;

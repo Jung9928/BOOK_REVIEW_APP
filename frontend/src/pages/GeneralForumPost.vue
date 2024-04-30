@@ -11,7 +11,7 @@
 <!--    <editor-content :editor="editor" style="height: 90%" />-->
 
     <!-- 이미지 업로드 -->
-    <input type="file" @change="handleFileUpload" class="form-control mb-3">
+<!--    <input type="file" @change="handleFileUpload" class="form-control mb-3">-->
 
     <!-- 등록 버튼 -->
     <button @click="registerPost" class="btn btn-outline-dark">등록</button>
@@ -51,12 +51,13 @@ export default {
     };
 
     const registerPost = () => {
-      // 게시물 등록 예외처리
+      // 게시물 등록 예외처리 (CKEditor5 특성 상, 양 끝에 쌍 따옴표가 붙어서 제거 필요)
+      const cleanedPostContent = postContent.value.replace(/^'(.*)'$/, '$1');
 
       // 게시물 등록 처리 로직
       axios.post('/api/v1/posts/postCreate', {
         title: postTitle.value,
-        content: postContent.value
+        content: cleanedPostContent
       })
           .then(response => {
             // 게시물 등록 완료
@@ -66,7 +67,15 @@ export default {
           })
           .catch(error => {
             console.error(error.response.data);
-            window.alert("게시물 등록에 실패했습니다. 다시 시도해주세요");
+
+            // HTTP 상태 코드에 따라 분기
+            if (error.response.status === 500) {
+              // 500 INTERNAL SERVER ERROR : 로그인 없이 작성할 경우
+              window.alert("로그인을 먼저 진행한 후, 작성해주세요");
+            } else {
+              // 다른 상태 코드에 대한 처리
+              window.alert("게시물 등록에 실패했습니다. 다시 시도해주세요");
+            }
           });
     };
 

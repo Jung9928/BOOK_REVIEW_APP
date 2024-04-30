@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReviewSearchConditionDTO {
 
-    private int bookId;                // 도서 데이터 pk값
+    private int bookId;
+    private String isbn;                  // 도서 isbn pk값
     private String reviewSite;            // 리뷰 출처
 }

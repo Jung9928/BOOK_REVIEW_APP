@@ -1,7 +1,7 @@
 <template>
   <div class="search-container">
     <!-- 검색 카테고리 선택 드롭다운 메뉴 -->
-    <select v-model="searchSubCategory" class="search-category">
+    <select v-model="searchDetailCategory" class="search-category">
       <option value="title">제목</option>
       <option value="author">저자</option>
       <option value="publisher">출판사</option>
@@ -29,13 +29,13 @@ export default {
   },
   setup(props) {
     const searchValue = ref(''); // 검색어를 담을 ref 변수
-    const searchSubCategory = ref('title'); // 검색 카테고리를 담을 ref 변수 (기본값: 제목)
+    const searchDetailCategory = ref('title'); // 검색 카테고리를 담을 ref 변수 (기본값: 제목)
 
     // 검색 버튼을 클릭 or enter 키를 눌렀을 때 호출되는 메소드
-    const search = () => {props.onSearch(searchValue.value, searchSubCategory.value); // 검색어와 카테고리를 부모 컴포넌트로 전달
+    const search = () => {props.onSearch(searchValue.value, searchDetailCategory.value); // 검색어와 카테고리를 부모 컴포넌트로 전달
     };
 
-    return { searchValue, search, searchSubCategory }; // 외부로 노출할 변수와 메소드 반환
+    return { searchValue, search, searchDetailCategory }; // 외부로 노출할 변수와 메소드 반환
   }
 }
 </script>

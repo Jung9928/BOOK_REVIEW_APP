@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,18 +25,20 @@ public class CommentDTO {
     private List<CommentDTO> childComments = new ArrayList<>();
     private String isDeleted;
 
-    public CommentDTO(Long id, String comment, String memberId, Long postId, String isDeleted) {
+    private Timestamp registeredAt;
+
+    public CommentDTO(Long id, String comment, String memberId, Long postId, String isDeleted, Timestamp registeredAt) {
         this.id = id;
         this.comment = comment;
         this.memberId = memberId;
         this.postId = postId;
         this.isDeleted = isDeleted;
+        this.registeredAt = registeredAt;
     }
 
     public static CommentDTO entityToCommentDTO(CommentEntity commentEntity) {
         return commentEntity.getIsDeleted() == Y ?
-                new CommentDTO(commentEntity.getCommentId(), "삭제된 댓글입니다.", null, null, null, Y.name()) :
-                new CommentDTO(commentEntity.getCommentId(), commentEntity.getComment(), commentEntity.getMember().getMemberId(), commentEntity.getGeneralForum().getPostId(), commentEntity.getIsDeleted().name());
-
+                new CommentDTO(commentEntity.getCommentId(), "삭제된 댓글입니다.", null, null, null, Y.name(), null) :
+                new CommentDTO(commentEntity.getCommentId(), commentEntity.getComment(), commentEntity.getMember().getMemberId(), commentEntity.getGeneralForum().getPostId(), commentEntity.getIsDeleted().name(), commentEntity.getRegisteredAt());
     }
 }

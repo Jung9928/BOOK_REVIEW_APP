@@ -12,12 +12,16 @@ import java.time.Instant;
 @Entity
 @Getter
 @Setter
-@Table(name = "books")
+@Table(name = "books", indexes = @Index(name = "idx_isbn", columnList = "isbn"))
 @NoArgsConstructor
 public class BookEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int book_id;
+
+    @Column(name = "isbn", length = 30)
+    private String isbn;
 
     @Column(length = 100)
     private String title;
@@ -54,6 +58,9 @@ public class BookEntity {
 
     @Column(length = 30)
     private String site;
+
+    @Column(name = "detail_info_path", length = 200)
+    private String detailInfoPath;
 
     @PreUpdate
     void modDtm() {

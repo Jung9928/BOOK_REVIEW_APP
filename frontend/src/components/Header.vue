@@ -15,9 +15,12 @@
   <nav class="py-2 bg-light border-bottom">
     <div class="container d-flex flex-wrap">
       <ul class="nav me-auto">
-        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2 active" aria-current="page">공지</router-link></li>
+<!--        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2 active" aria-current="page">공지</router-link></li>-->
+        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2 active" aria-current="page" data-bs-toggle="modal" data-bs-target="#announcementModal">공지</router-link></li>
+        <Announcement/>
+
         <li class="nav-item"><router-link to="/generalForum" class="nav-link link-dark px-2">자유게시판</router-link></li>
-<!--        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">도서 추천게시판</router-link></li>-->
+<!--&lt;!&ndash;        <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">도서 추천게시판</router-link></li>&ndash;&gt;-->
         <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">FAQ</router-link></li>
         <li class="nav-item"><router-link to="/" class="nav-link link-dark px-2">삭제/문의</router-link></li>
       </ul>
@@ -36,9 +39,9 @@
               {{ $store.state.memberId }}님
             </button>
             <ul class="dropdown-menu">
-              <li><router-link to="{name: 'MemberInfo', query: {memberId: memberId, email: email}}" class="dropdown-item" @click="goToMemberInfoPage()">회원정보 보기</router-link></li>
-              <li><a class="dropdown-item" href="#">작성게시글 보기</a></li>
-              <li><a class="dropdown-item" href="#">작성댓글 확인</a></li>
+              <li><a href="#" class="dropdown-item" @click="goToMemberInfoPage()">회원정보 보기</a></li>
+              <li><a href="/myGeneralForumList" class="dropdown-item">작성게시글 보기</a></li>
+<!--              <li><a href="/myCommentList" class="dropdown-item">작성댓글 확인</a></li>-->
               <li @click="logout()" ><router-link to="/login" class="dropdown-item">로그아웃</router-link></li>
             </ul>
           </div>
@@ -52,14 +55,15 @@
 
 <script>
 import router from "@/scripts/router";
-//import axios from "axios";
-import { computed } from "vue";
+import {computed} from "vue";
 import { useStore } from 'vuex';
 import axiosInterceptors from "@/common/interceptors";
 import axios from "axios";
+import Announcement from "@/components/Announcement";
 
 export default {
   name: 'Header',
+  components: {Announcement},
   setup() {
     const store = useStore();
 
@@ -96,7 +100,7 @@ export default {
             window.alert("해당 유저의 email 정보를 가져오는데 실패했습니다");
             router.push({path: "/"});
           })
-      }
+    };
 
     return { isAccessToken, logout, goToMemberInfoPage };
   },

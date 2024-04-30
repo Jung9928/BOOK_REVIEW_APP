@@ -24,9 +24,8 @@ public class BookController {
     public BookPagingResponseDTO<List<BookResponseDTO>> getBookList(@PageableDefault(sort = {"publishDate"}) Pageable pageable, BookSearchConditionDTO bookSearchConditionDTO) {
         log.info("searchMainCategory : " + bookSearchConditionDTO.getSearchMainCategory());
         log.info("searchSubCategory : " + bookSearchConditionDTO.getSearchSubCategory());
+        log.info("searchDetailCategory : " + bookSearchConditionDTO.getSearchDetailCategory());
         log.info("searchValue : " + bookSearchConditionDTO.getSearchValue());
         return bookService.getBookList(pageable, bookSearchConditionDTO);
     }
-
-
 }

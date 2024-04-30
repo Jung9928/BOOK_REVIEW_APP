@@ -32,13 +32,27 @@ public class CommentController {
 
 //        MemberDTO memberDTO = memberService.getMemberByMemberId(customMemberDetails.getUsername());
 
+        log.info("content : " + commentRequestDTO.getContent());
+        log.info("postId : " + commentRequestDTO.getPostId());
+        log.info("memberId : " + commentRequestDTO.getMemberId());
+        log.info("parentId : " + commentRequestDTO.getParentId());
+        log.info("isDeleted : " + commentRequestDTO.getIsDeleted());
+
         CommentDTO commentDTO = commentService.createComment(commentRequestDTO);
         return ResponseEntity.ok().body(commentDTO);
     }
 
     // 게시글의 댓글 페이징
     @GetMapping("/list")
-    public ResponseEntity<Page<CommentDTO>> commentList(@RequestParam GeneralForumEntity generalForumEntity, @PageableDefault(size=10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<Page<CommentDTO>> commentList(@RequestParam GeneralForumEntity generalForumEntity, @PageableDefault(size=10, sort = "commentId", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        log.info("postId : " + generalForumEntity.getPostId());
+        log.info("title : " + generalForumEntity.getTitle());
+        log.info("memberId : " + generalForumEntity.getMember().getMemberId());
+        log.info("content : " + generalForumEntity.getContent());
+        log.info("comments : " + generalForumEntity.getComments());
+
+
         Page<CommentDTO> commentDTOS = commentService.pageList(generalForumEntity, pageable);
 
         return ResponseEntity.ok().body(commentDTOS);

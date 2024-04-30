@@ -25,7 +25,8 @@ public class ReviewController {
             @PageableDefault(sort = {"reviewDate"}) Pageable pageable,
             ReviewSearchConditionDTO reviewSearchConditionDTO
     ) {
-        log.info("review book id : " + reviewSearchConditionDTO.getBookId());
+        log.info("book id : " + reviewSearchConditionDTO.getBookId());
+        log.info("review book isbn : " + reviewSearchConditionDTO.getIsbn());
         log.info("review site : " + reviewSearchConditionDTO.getReviewSite());
         return reviewService.getReviewList(pageable, reviewSearchConditionDTO);
     }

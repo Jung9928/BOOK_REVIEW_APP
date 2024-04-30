@@ -26,8 +26,35 @@
 
   <!-- 게시글 목록 컴포넌트 삽입 -->
 <!--  <PostView :items="generalForumList" :fields="fields" @click="getContent"/>-->
-  <div>
-    <b-table class="post-table" :items="generalForumList" @row-clicked="getContent" @click="getCommentList"></b-table>
+  <div class="post-table">
+<!--    <b-table class="post-table" :items="generalForumList" @row-clicked="getContent"></b-table>-->
+    <table class="table table-hover">
+      <colgroup>
+        <col width="15%">
+        <col width="50%">
+        <col width="15%">
+        <col width="10%">
+        <col width="10%">
+      </colgroup>
+      <thead class="table-light">
+      <tr>
+        <th scope="col">번호</th>
+        <th scope="col">제목</th>
+        <th scope="col">글쓴이</th>
+        <th scope="col">날짜</th>
+        <th scope="col">조회수</th>
+      </tr>
+      </thead>
+      <tbody class="table-group-divider">
+      <tr v-for="item in generalForumList" :key="item.post_id" @click="getContent(item)">
+        <td>{{ item.번호 }}</td>
+        <td>{{ item.제목 }}</td>
+        <td>{{ item.글쓴이 }}</td>
+        <td>{{ item.날짜 }}</td>
+        <td>{{ item.조회수 }}</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- 페이지네이션 -->
@@ -56,13 +83,14 @@
 import {ref, computed} from 'vue';
 import axios from "axios";
 import router from "@/scripts/router";
+import store from "@/scripts/store";
 
 export default {
 
   setup() {
     const generalForumList = ref([]);
     const currentPage = ref(1);
-    const totalPages = ref(0);
+    const totalPages = ref(1);
     const searchCategory = ref('title');
     const searchValue = ref('');
 
@@ -116,6 +144,18 @@ export default {
       const day = date.getDate().toString().padStart(2, '0');
       return `${year}.${month}.${day}`;
     };
+
+    // YYYY.MM.DD 형식으로 날짜 변환하는 함수
+    const formatDateTime = (dateString) => {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${year}.${month}.${day} ${hours}:${minutes}`.toString();
+    };
+
 
     // 맨 첫페이지 이동
     const goFirstPage = () => {
@@ -197,28 +237,31 @@ export default {
           .then((res) => {
             // 가져온 게시글 데이터 처리
             // console.log("title : " + JSON.stringify(res.data.result.title));
-            const title = JSON.stringify(res.data.result.title);
+            const title = res.data.result.title;
             // console.log("content : " + JSON.stringify(res.data.result.content));
 
-            const content = JSON.stringify(res.data.result.content);
-            const memberId = JSON.stringify(res.data.result.member_id);
-            router.push({path:"/generalForumPostDetail", query: {postId : postId, title: title, content: content, memberId: memberId}});
+            const content = res.data.result.content;
+            const memberId = res.data.result.member_id;
+            const registeredAt = formatDateTime(res.data.result.registeredAt);
+            const viewCount = res.data.result.vw_cnt;
+            // router.push({path:"/generalForumPostDetail", query: {postId : postId, title: title, content: content, memberId: memberId}});
+
+            const postData = {
+              postId : postId,
+              title : title,
+              content : content,
+              memberId : memberId,
+              registeredAt : registeredAt,
+              viewCount : viewCount
+            }
+
+            // Vuex 액션 호출하여 데이터 저장
+            store.dispatch('fetchPostData', postData);
+
+            router.push({path:`/generalForumPostDetail`});
           })
           .catch((err) => {
             console.error('게시글을 가져오는 중 오류 발생:', err);
-          });
-    }
-
-    // 게시글 클릭 시, 해당 게시글의 (대)댓글 가져오기
-    const getCommentList = () => {
-      console.log("postId2 : " + postId);
-
-      axios.get(`/api/v1/comment/reply/${postId}`)
-          .then((res) => {
-            commentList.value = res.data.data;
-          })
-          .catch((err) => {
-            console.error('댓글 리스트를 가져오는 중 오류 발생:', err);
           });
     }
 
@@ -241,8 +284,7 @@ export default {
 
       searchGeneralForums,
       getContent,
-      getCommentList,
-      fetchGeneralForums
+      fetchGeneralForums,
     };
   },
 }
@@ -294,4 +336,27 @@ export default {
   margin-left: 68%; /* 현재 위치로부터 우측으로 이동 */
   border: none;
 }
+
+/* 페이지네이션 css */
+.page-link {
+ color: #000;
+ background-color: #fff;
+ border: 1px solid #ccc;
+}
+
+.page-item.active .page-link {
+  z-index: 1;
+  color: #555;
+  font-weight:bold;
+  background-color: #f1f1f1;
+  border-color: #ccc;
+
+}
+
+.page-link:focus, .page-link:hover {
+  color: #000;
+  background-color: #fafafa;
+  border-color: #ccc;
+}
+
 </style>

@@ -28,6 +28,7 @@ public class ReviewService {
         for (ReviewEntity reviewEntity : reviewEntities) {
             ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
                     .book_id(reviewEntity.getBookId())
+                    .isbn(reviewEntity.getIsbn())
                     .review_id(reviewEntity.getReview_id())
                     .review_title(reviewEntity.getReview_title())
                     .review_rating(reviewEntity.getReview_rating())
@@ -45,7 +46,7 @@ public class ReviewService {
                 (int) reviewEntities.getTotalElements()
                 , pageable.getPageNumber() + 1
                 , pageable.getPageSize()
-                , 10
+                , 9
         );
 
         return ReviewPagingResponseDTO.OK(reviewResponseDTOList, reviewPaginationDTO);

@@ -6,6 +6,14 @@ const store = createStore({
         isLoggedIn: localStorage.getItem('isLoggedIn') || false,            // 로그인 상태 저장 변수
         accessToken : localStorage.getItem('accessToken') || '',            // accessToken 저장 변수
         memberId : localStorage.getItem('memberId') || '',                  // memberId 저장 변수
+        postData : {
+            postId : null,
+            title : null,
+            content : null,
+            memberId : null,
+            registeredAt : null,
+            viewCount : 0
+        }
     },
 
     mutations: {
@@ -19,6 +27,10 @@ const store = createStore({
 
         setMemberId(state, value) {
             state.memberId = value;
+        },
+
+        setPostData(state, data) {
+            state.postData = data;
         }
     },
 
@@ -46,10 +58,19 @@ const store = createStore({
             localStorage.removeItem('accessToken');
             localStorage.removeItem('memberId');
         },
+
+        // 게시글 상세 화면 이동 시, 헤당 게시글 데이터 저장
+        fetchPostData({ commit }, postData) {
+            commit('setPostData', postData);
+        }
     },
 
     getters: {
-        isLoggedIn: state => !!state.isLoggedIn            // 로그인 상태 여부를 반환
+        isLoggedIn: state => !!state.isLoggedIn,            // 로그인 상태 여부를 반환
+
+        getPostData(state) {
+            return state.postData;
+        }
     }
 })
 

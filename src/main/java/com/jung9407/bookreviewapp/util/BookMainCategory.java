@@ -3,8 +3,9 @@ package com.jung9407.bookreviewapp.util;
 import lombok.Getter;
 
 @Getter
-public enum BookSerialNumber {
+public enum BookMainCategory {
 
+    // 도서 메인 카테고리
     COMPUTER_ENGINEERING("001001003031"),
     COMPUTER_BEGINNER("001001003019"),
     MOBILE_PROGRAMMING("001001003023"),
@@ -16,13 +17,13 @@ public enum BookSerialNumber {
     GRAPHIC_DESIGN_MULTIMEDIA("001001003028")
     ;
 
-    private String bsn;
+    private String categoryCode;
 
-    BookSerialNumber(String bsn) {
-        this.bsn = bsn;
+    BookMainCategory(String categoryCode) {
+        this.categoryCode = categoryCode;
     }
 
-    public String getBookSerialNumber() {
-        return bsn;
+    public String getBookMainCategory() {
+        return categoryCode;
     }
 }

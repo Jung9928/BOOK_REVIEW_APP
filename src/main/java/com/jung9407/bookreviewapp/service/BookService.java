@@ -29,6 +29,7 @@ public class BookService {
         for (BookEntity bookEntity : bookEntities) {
             BookResponseDTO bookResponseDTO = BookResponseDTO.builder()
                     .book_id(bookEntity.getBook_id())
+                    .isbn(bookEntity.getIsbn())
                     .title(bookEntity.getTitle())
                     .author(bookEntity.getAuthor())
                     .publisher(bookEntity.getPublisher())
@@ -41,6 +42,7 @@ public class BookService {
                     .imgPath(bookEntity.getImgPath())
                     .modifiedAt(bookEntity.getModifiedAt())
                     .site(bookEntity.getSite())
+                    .detailInfoPath(bookEntity.getDetailInfoPath())
                     .build();
 
             bookResponseDTOList.add(bookResponseDTO);
@@ -48,9 +50,9 @@ public class BookService {
 
         BookPaginationDTO bookPaginationDTO = new BookPaginationDTO(
                 (int) bookEntities.getTotalElements()
-                , pageable.getPageNumber() + 1
+                , pageable.getPageNumber()
                 , pageable.getPageSize()
-                , 10
+                , 9
         );
 
         return BookPagingResponseDTO.OK(bookResponseDTOList, bookPaginationDTO);

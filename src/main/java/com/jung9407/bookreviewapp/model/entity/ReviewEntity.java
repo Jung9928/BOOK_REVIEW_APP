@@ -11,7 +11,7 @@ import java.time.Instant;
 @Entity
 @Getter
 @Setter
-@Table(name = "reviews")
+@Table(name = "reviews", indexes = @Index(name = "idx_isbn", columnList = "isbn"))
 @NoArgsConstructor
 public class ReviewEntity {
 
@@ -19,8 +19,11 @@ public class ReviewEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int review_id;
 
-    @Column(name = "book_id", length = 100)
+    @Column(name = "book_id")
     private int bookId;
+
+    @Column(name = "isbn")
+    private String isbn;
 
     @Column(length = 1000)
     private String review_title;

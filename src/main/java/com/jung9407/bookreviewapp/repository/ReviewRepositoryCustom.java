@@ -27,13 +27,16 @@ public class ReviewRepositoryCustom {
         JPAQuery<ReviewEntity> query =
                 queryFactory.selectFrom(reviewEntity).where(
                         searchBookId(reviewSearchConditionDTO.getBookId()),
+//                        searchBookIsbn(reviewSearchConditionDTO.getIsbn()),
                         searchReviewSite(reviewSearchConditionDTO.getReviewSite())
                 );
 
         long total = query.stream().count();            // 전체 리뷰 데이터 카운트 후, 아래에서 조건 처리
 
         List<ReviewEntity> results = query
-                .where(searchBookId(reviewSearchConditionDTO.getBookId()),
+                .where(
+                        searchBookId(reviewSearchConditionDTO.getBookId()),
+//                        searchBookIsbn(reviewSearchConditionDTO.getIsbn()),
                         searchReviewSite(reviewSearchConditionDTO.getReviewSite()))
 //                .offset(pageable.getOffset())
                 .offset(((long)(pageable.getPageNumber()-1)* pageable.getPageSize()))
@@ -44,8 +47,12 @@ public class ReviewRepositoryCustom {
         return new PageImpl<>(results, pageable, total);
     }
 
-    private BooleanExpression searchBookId(int book_id) {
-        return reviewEntity.bookId.eq(book_id);
+//    private BooleanExpression searchBookIsbn(String isbn) {
+//        return reviewEntity.isbn.eq(isbn);
+//    }
+
+    private BooleanExpression searchBookId(int id) {
+        return reviewEntity.bookId.eq(id);
     }
 
     private BooleanExpression searchReviewSite(String review_site) {
